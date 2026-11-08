@@ -10,13 +10,13 @@ import {
 import { calculateReadingTime } from '../../utils/readingTime';
 import { TopicId, Article, Experiment } from '../../types';
 
-// Discover all MDX files at build time via Vite's eager raw glob
-const articleModules = import.meta.glob('/content/articles/*.mdx', {
+// Discover all MDX files at build time via Vite's eager raw glob from canonical src/content
+const articleModules = import.meta.glob('/src/content/articles/*.mdx', {
   query: '?raw',
   eager: true
 }) as Record<string, { default: string } | string>;
 
-const experimentModules = import.meta.glob('/content/experiments/*.mdx', {
+const experimentModules = import.meta.glob('/src/content/experiments/*.mdx', {
   query: '?raw',
   eager: true
 }) as Record<string, { default: string } | string>;

@@ -178,7 +178,7 @@ Total crypto jobs  : 4
 All 4 jobs completed in 269.9 ms total.
 ```
 
-All 4 jobs started at the same instant ($t=0$) and finished together at $\approx 260\text{ms}$. Why? Because libuv has 4 worker threads. Each job received its own dedicated thread.
+All 4 jobs started at the same instant (t=0) and finished together at ~260ms. Why? Because libuv has 4 worker threads. Each job received its own dedicated thread.
 
 ---
 
@@ -211,7 +211,7 @@ Notice the clean breakpoint.
 - Jobs #1, #2, #3, and #4 finished in **~245ms**.
 - Jobs #5, #6, #7, and #8 were queued in libuv's internal FIFO work queue. They could not start until Wave 1 completed. Their duration doubled to **~550ms**.
 
-Total wall-clock duration: **563.6ms** ($2 \times 260\text{ms}$).
+Total wall-clock duration: **563.6ms** (2 x 260ms).
 
 ---
 

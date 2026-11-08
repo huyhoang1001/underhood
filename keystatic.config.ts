@@ -1,4 +1,22 @@
-import { config, fields, collection } from '@keystatic/core';
+import { config, fields, collection, component } from '@keystatic/core';
+
+const NodeProcessDiagramBlock = component({
+  label: 'Node.js Process Diagram',
+  schema: {},
+  preview: () => null
+}) as any;
+
+const NodeThreadpoolVisualizerBlock = component({
+  label: 'Node.js Threadpool Visualizer',
+  schema: {},
+  preview: () => null
+}) as any;
+
+const ThreadPoolVisualizerBlock = component({
+  label: 'Thread Pool Visualizer',
+  schema: {},
+  preview: () => null
+}) as any;
 
 export default config({
   storage: {
@@ -41,8 +59,21 @@ export default config({
         }),
         featured: fields.checkbox({ label: 'Featured Article', defaultValue: false }),
         githubUrl: fields.text({ label: 'GitHub Repository URL' }),
+        relatedArticles: fields.array(fields.text({ label: 'Related Article Slug' }), {
+          label: 'Related Articles',
+          itemLabel: (props) => props.value
+        }),
+        relatedExperiments: fields.array(fields.text({ label: 'Related Experiment Slug' }), {
+          label: 'Related Experiments',
+          itemLabel: (props) => props.value
+        }),
         content: fields.mdx({
-          label: 'Content'
+          label: 'Content',
+          components: {
+            NodeProcessDiagram: NodeProcessDiagramBlock,
+            NodeThreadpoolVisualizer: NodeThreadpoolVisualizerBlock,
+            ThreadPoolVisualizer: ThreadPoolVisualizerBlock
+          }
         })
       }
     }),
@@ -100,7 +131,12 @@ export default config({
           defaultValue: 'node-threadpool'
         }),
         content: fields.mdx({
-          label: 'Content'
+          label: 'Content',
+          components: {
+            NodeProcessDiagram: NodeProcessDiagramBlock,
+            NodeThreadpoolVisualizer: NodeThreadpoolVisualizerBlock,
+            ThreadPoolVisualizer: ThreadPoolVisualizerBlock
+          }
         })
       }
     })

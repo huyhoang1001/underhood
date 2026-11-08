@@ -1,0 +1,138 @@
+import React from 'react';
+import { Github, Twitter, Mail, Rss, ArrowUpRight, Terminal, Shield, Cpu, Activity } from 'lucide-react';
+import { AUTHOR } from '../data/author';
+import { ViewRoute } from '../types';
+
+interface AboutViewProps {
+  onNavigate: (route: ViewRoute) => void;
+  onOpenRss: () => void;
+}
+
+export const AboutView: React.FC<AboutViewProps> = ({ onNavigate, onOpenRss }) => {
+  return (
+    <div className="py-8 sm:py-12 space-y-12 max-w-3xl">
+      {/* Intro Header */}
+      <header className="space-y-4 pb-8 border-b border-[#e7e3da] dark:border-[#30363d]">
+        <div className="text-xs font-mono uppercase tracking-widest text-sky-600 dark:text-sky-400">
+          Engineering Monograph
+        </div>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc]">
+          About Underhood & Author
+        </h1>
+        <p className="text-base sm:text-lg text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+          {AUTHOR.bio}
+        </p>
+
+        {/* Contact links */}
+        <div className="flex flex-wrap items-center gap-4 pt-2 text-xs">
+          <a
+            href={AUTHOR.links.github}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#f2ede4] dark:bg-[#161b22] border border-[#e7e3da] dark:border-[#30363d] text-[#1c1917] dark:text-[#f0f6fc] hover:border-slate-400 dark:hover:border-slate-600 transition-colors"
+          >
+            <Github className="w-4 h-4" />
+            <span>GitHub ({AUTHOR.handle})</span>
+          </a>
+          <a
+            href={`mailto:${AUTHOR.links.email}`}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#f2ede4] dark:bg-[#161b22] border border-[#e7e3da] dark:border-[#30363d] text-[#1c1917] dark:text-[#f0f6fc] hover:border-slate-400 dark:hover:border-slate-600 transition-colors"
+          >
+            <Mail className="w-4 h-4" />
+            <span>{AUTHOR.links.email}</span>
+          </a>
+          <button
+            onClick={onOpenRss}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#f2ede4] dark:bg-[#161b22] border border-[#e7e3da] dark:border-[#30363d] text-[#1c1917] dark:text-[#f0f6fc] hover:border-slate-400 dark:hover:border-slate-600 transition-colors"
+          >
+            <Rss className="w-4 h-4 text-amber-500" />
+            <span>RSS Subscription</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Editorial Philosophy */}
+      <section className="space-y-4">
+        <h2 className="text-xs uppercase tracking-widest font-mono text-[#78716c] dark:text-[#8b949e]">
+          Editorial Philosophy
+        </h2>
+        <div className="p-6 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#f7f4ee]/70 dark:bg-[#161b22]/70">
+          <blockquote className="text-base sm:text-lg font-serif italic text-[#1c1917] dark:text-[#f0f6fc] leading-relaxed">
+            &ldquo;{AUTHOR.editorialPhilosophy}&rdquo;
+          </blockquote>
+        </div>
+      </section>
+
+      {/* Core Architectural Principles */}
+      <section className="space-y-6">
+        <h2 className="text-xs uppercase tracking-widest font-mono text-[#78716c] dark:text-[#8b949e]">
+          Core Engineering Principles
+        </h2>
+        <div className="space-y-4">
+          {AUTHOR.principles.map((principle, idx) => (
+            <div
+              key={idx}
+              className="p-5 rounded-lg border border-[#e7e3da] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] space-y-2"
+            >
+              <h3 className="text-sm sm:text-base font-bold text-[#1c1917] dark:text-[#f0f6fc]">
+                0{idx + 1}. {principle.title}
+              </h3>
+              <p className="text-xs sm:text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+                {principle.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Selected Infrastructure Projects */}
+      <section className="space-y-6">
+        <h2 className="text-xs uppercase tracking-widest font-mono text-[#78716c] dark:text-[#8b949e]">
+          Selected Open-Source Infrastructure Projects
+        </h2>
+        <div className="space-y-4">
+          {AUTHOR.selectedProjects.map((proj, idx) => (
+            <div
+              key={idx}
+              className="p-5 rounded-lg border border-[#e7e3da] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-[#1c1917] dark:text-[#f0f6fc]">
+                    {proj.title}
+                  </h3>
+                  <div className="text-xs text-sky-600 dark:text-sky-400 font-mono">
+                    {proj.role}
+                  </div>
+                </div>
+                {proj.link && (
+                  <a
+                    href={proj.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[#78716c] dark:text-[#8b949e] hover:text-[#1c1917] dark:hover:text-[#f0f6fc]"
+                  >
+                    <ArrowUpRight className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+
+              <p className="text-xs sm:text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+                {proj.description}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2 text-xs text-[#a8a29e] dark:text-[#6e7681]">
+                {proj.technologies.map((tech, tIdx) => (
+                  <React.Fragment key={tech}>
+                    {tIdx > 0 && <span>·</span>}
+                    <span>{tech}</span>
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+};

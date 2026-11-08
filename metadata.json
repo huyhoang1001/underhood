@@ -1,0 +1,6 @@
+{
+  "name": "Underhood — Engineering Beyond the Surface",
+  "description": "An independent engineering publication exploring distributed systems, performance, backend architecture, and reproducible experiments.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

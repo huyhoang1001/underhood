@@ -4,22 +4,16 @@ import {
   Calendar,
   Clock,
   Github,
-  Share2,
   Check,
   Link as LinkIcon,
-  BookOpen,
   ArrowRight,
-  ArrowLeft as PrevIcon
+  ArrowLeft as PrevIcon,
+  AlertCircle
 } from 'lucide-react';
-import { Article, ViewRoute } from '../types';
-import { ARTICLES } from '../data/articles';
-import { CodeBlock } from '../components/CodeBlock';
-import { ArchitectureDiagram } from '../components/ArchitectureDiagram';
-import { Callout } from '../components/Callout';
+import { ViewRoute } from '../types';
+import { getArticleBySlug, getArticles, toArticle } from '../lib/content';
+import { MdxRenderer } from '../lib/content/mdx';
 import { TableOfContents } from '../components/TableOfContents';
-import { calculateReadingTime } from '../utils/readingTime';
-import { NodeProcessDiagram } from '../components/NodeProcessDiagram';
-import { NodeThreadpoolVisualizer } from '../components/NodeThreadpoolVisualizer';
 
 interface ArticleViewProps {
   slug: string;
@@ -29,14 +23,40 @@ interface ArticleViewProps {
 export const ArticleView: React.FC<ArticleViewProps> = ({ slug, onNavigate }) => {
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const articleIndex = ARTICLES.findIndex((a) => a.slug === slug);
-  const article = ARTICLES[articleIndex] || ARTICLES[0];
-  const readingStats = calculateReadingTime(article.content);
+  const doc = getArticleBySlug(slug);
 
-  const prevArticle = articleIndex > 0 ? ARTICLES[articleIndex - 1] : null;
-  const nextArticle = articleIndex < ARTICLES.length - 1 ? ARTICLES[articleIndex + 1] : null;
+  if (!doc) {
+    return (
+      <div className="py-16 sm:py-24 text-center max-w-xl mx-auto space-y-6">
+        <div className="inline-flex p-3 rounded-full bg-amber-500/10 text-amber-500">
+          <AlertCircle className="w-8 h-8" />
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#1c1917] dark:text-[#f0f6fc]">
+          Article Not Found
+        </h1>
+        <p className="text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+          The requested essay &ldquo;{slug}&rdquo; does not exist or is currently restricted to local development review.
+        </p>
+        <div>
+          <button
+            onClick={() => onNavigate({ view: 'writing' })}
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-sky-600 hover:bg-sky-500 rounded-md transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Return to Writing Index</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  const relatedArticles = ARTICLES.filter((a) =>
+  const article = toArticle(doc);
+  const allArticles = getArticles().map(toArticle);
+  const articleIndex = allArticles.findIndex((a) => a.slug === slug);
+  const prevArticle = articleIndex > 0 ? allArticles[articleIndex - 1] : null;
+  const nextArticle = articleIndex >= 0 && articleIndex < allArticles.length - 1 ? allArticles[articleIndex + 1] : null;
+
+  const relatedArticles = allArticles.filter((a) =>
     article.relatedSlugs?.includes(a.slug)
   );
 
@@ -46,7 +66,7 @@ export const ArticleView: React.FC<ArticleViewProps> = ({ slug, onNavigate }) =>
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     } catch {
-      // Fallback
+      // Clipboard fallback
     }
   };
 
@@ -81,14 +101,14 @@ export const ArticleView: React.FC<ArticleViewProps> = ({ slug, onNavigate }) =>
           <span>·</span>
           <span
             className="flex items-center gap-1.5"
-            title={`${readingStats.words.toLocaleString()} words · calculated at 200 words per minute baseline (${readingStats.codeBlocksCount} code blocks)`}
+            title={`${doc.wordCount.toLocaleString()} words · calculated at 200 words per minute baseline`}
           >
             <Clock className="w-3 h-3 text-[#a8a29e] dark:text-[#6e7681]" />
             <span className="font-medium text-[#1c1917] dark:text-[#f0f6fc]">
-              {readingStats.text}
+              {article.readingTime}
             </span>
             <span className="text-[11px] text-[#a8a29e] dark:text-[#6e7681] font-mono">
-              ({readingStats.words.toLocaleString()} words @ 200 wpm)
+              ({doc.wordCount.toLocaleString()} words @ 200 wpm)
             </span>
           </span>
           {article.draft && (
@@ -160,36 +180,11 @@ export const ArticleView: React.FC<ArticleViewProps> = ({ slug, onNavigate }) =>
         </div>
       </header>
 
-      {/* Main Two-Column Reading Canvas: Prose (65-75ch) & Sticky TOC */}
+      {/* Main Two-Column Reading Canvas: Prose & Sticky TOC */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mt-10">
         {/* Article Body Content (8 cols) */}
         <main className="lg:col-span-8 max-w-prose">
-          <RenderArticleContent
-            content={article.content}
-            slug={article.slug}
-            onNavigate={onNavigate}
-          />
-
-          {/* Footnotes & References Section */}
-          <section className="mt-16 pt-8 border-t border-[#e7e3da] dark:border-[#30363d] text-xs space-y-3">
-            <div className="font-semibold uppercase tracking-wider text-[#1c1917] dark:text-[#f0f6fc]">
-              References & Reading Notes
-            </div>
-            <ol className="list-decimal pl-4 space-y-1.5 text-[#78716c] dark:text-[#8b949e] leading-relaxed">
-              <li>
-                Little, J. D. C. (1961). <em>A Proof for the Queuing Formula: L = λW</em>. Operations Research, 9(3), 383-387.
-              </li>
-              <li>
-                Nichols, K., & Jacobson, V. (2012). <em>Controlling Queue Delay (CoDel)</em>. Communications of the ACM, 55(7), 42-50.
-              </li>
-              <li>
-                Brakemo, L. S., & Peterson, L. L. (1995). <em>TCP Vegas: End to End Congestion Avoidance on a Global Internet</em>. IEEE JSAC.
-              </li>
-              <li>
-                HTTP/2 Specification RFC 7540, Section 5.2: <em>Flow Control Principles & Window Adjustments</em>.
-              </li>
-            </ol>
-          </section>
+          <MdxRenderer content={article.content} />
 
           {/* Prev / Next Article Navigation */}
           <nav className="mt-12 pt-8 border-t border-[#e7e3da] dark:border-[#30363d] grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -231,9 +226,9 @@ export const ArticleView: React.FC<ArticleViewProps> = ({ slug, onNavigate }) =>
 
         {/* Right Sidebar: Table of Contents & Related Investigations (4 cols) */}
         <aside className="hidden lg:block lg:col-span-4 space-y-10 pl-4">
-          <TableOfContents items={article.toc} />
+          <TableOfContents items={doc.toc} />
 
-          {/* Related Articles Drawer */}
+          {/* Related Articles */}
           {relatedArticles.length > 0 && (
             <div className="space-y-3 pt-6 border-t border-[#e7e3da] dark:border-[#30363d]">
               <div className="font-semibold uppercase tracking-wider text-[11px] text-[#1c1917] dark:text-[#f0f6fc]">
@@ -262,322 +257,3 @@ export const ArticleView: React.FC<ArticleViewProps> = ({ slug, onNavigate }) =>
     </div>
   );
 };
-
-/* ------------------------------------------------------------------ */
-/* MDX / Markdown Parser & Component Renderer                          */
-/* ------------------------------------------------------------------ */
-type MarkdownBlock =
-  | { type: 'h2'; content: string; id: string }
-  | { type: 'h3'; content: string; id: string }
-  | { type: 'code'; language: string; content: string; filename?: string }
-  | { type: 'blockquote'; content: string }
-  | { type: 'table'; headers: string[]; rows: string[][] }
-  | { type: 'list'; items: string[] }
-  | { type: 'olist'; items: string[] }
-  | { type: 'p'; content: string };
-
-function RenderArticleContent({
-  content,
-  slug,
-  onNavigate
-}: {
-  content: string;
-  slug: string;
-  onNavigate: (route: ViewRoute) => void;
-}) {
-  // Split into chunks based on code fences and headers
-  const tokens = parseMarkdownBlocks(content);
-
-  return (
-    <div className="space-y-6 text-[#24292f] dark:text-[#c9d1d9] text-[15px] sm:text-base leading-[1.8] font-normal">
-      {/* If this is the backpressure article, mount interactive architecture topology diagram */}
-      {slug === 'backpressure-is-not-an-overload-policy' && (
-        <ArchitectureDiagram />
-      )}
-
-      {/* If this is the Node.js concurrency article, mount interactive Node.js runtime process diagram and threadpool visualizer */}
-      {slug === 'node-js-is-single-threaded-who-is-doing-the-work' && (
-        <>
-          <NodeProcessDiagram />
-          <NodeThreadpoolVisualizer />
-        </>
-      )}
-
-      {tokens.map((block, idx) => {
-        if (block.type === 'h2') {
-          return (
-            <h2
-              key={idx}
-              id={block.id}
-              className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc] pt-8 pb-1 border-b border-[#e7e3da] dark:border-[#30363d] scroll-mt-24"
-            >
-              {block.content}
-            </h2>
-          );
-        }
-
-        if (block.type === 'h3') {
-          return (
-            <h3
-              key={idx}
-              id={block.id}
-              className="text-xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc] pt-4 scroll-mt-24"
-            >
-              {block.content}
-            </h3>
-          );
-        }
-
-        if (block.type === 'code') {
-          return (
-            <CodeBlock
-              key={idx}
-              code={block.content}
-              language={block.language}
-              filename={block.filename}
-            />
-          );
-        }
-
-        if (block.type === 'blockquote') {
-          return (
-            <Callout key={idx} type="principle" title="Architectural Principle">
-              <p>{block.content}</p>
-            </Callout>
-          );
-        }
-
-        if (block.type === 'table') {
-          return (
-            <div
-              key={idx}
-              className="my-6 overflow-x-auto rounded-lg border border-[#e7e3da] dark:border-[#30363d]"
-            >
-              <table className="w-full text-left text-xs sm:text-sm">
-                <thead className="bg-[#f7f4ee] dark:bg-[#161b22] text-[#1c1917] dark:text-[#f0f6fc] border-b border-[#e7e3da] dark:border-[#30363d]">
-                  <tr>
-                    {block.headers.map((h, hIdx) => (
-                      <th key={hIdx} className="p-3 font-semibold">
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#e7e3da] dark:divide-[#30363d] font-mono text-xs">
-                  {block.rows.map((row, rIdx) => (
-                    <tr
-                      key={rIdx}
-                      className="hover:bg-[#f2ede4]/50 dark:hover:bg-[#1c2128]/50"
-                    >
-                      {row.map((cell, cIdx) => (
-                        <td key={cIdx} className="p-3">
-                          {cell}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          );
-        }
-
-        if (block.type === 'list') {
-          return (
-            <ul
-              key={idx}
-              className="list-disc pl-5 space-y-2 text-[#44403c] dark:text-[#c9d1d9]"
-            >
-              {block.items.map((item, iIdx) => (
-                <li key={iIdx}>{renderInlineMarkdown(item)}</li>
-              ))}
-            </ul>
-          );
-        }
-
-        if (block.type === 'olist') {
-          return (
-            <ol
-              key={idx}
-              className="list-decimal pl-5 space-y-2 text-[#44403c] dark:text-[#c9d1d9]"
-            >
-              {block.items.map((item, iIdx) => (
-                <li key={iIdx}>{renderInlineMarkdown(item)}</li>
-              ))}
-            </ol>
-          );
-        }
-
-        // Standard paragraph
-        return (
-          <p key={idx} className="leading-relaxed">
-            {renderInlineMarkdown(block.content)}
-          </p>
-        );
-      })}
-    </div>
-  );
-}
-
-// Inline formatting helper for bold, code, and emphasis
-function renderInlineMarkdown(text: string): React.ReactNode {
-  // Simple regex parser for `code`, **bold**, *italic*
-  const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g);
-
-  return parts.map((part, index) => {
-    if (part.startsWith('`') && part.endsWith('`')) {
-      return (
-        <code
-          key={index}
-          className="px-1.5 py-0.5 text-xs font-mono rounded bg-[#f2ede4] dark:bg-[#161b22] text-sky-700 dark:text-sky-300 border border-[#e7e3da] dark:border-[#30363d]"
-        >
-          {part.slice(1, -1)}
-        </code>
-      );
-    }
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return (
-        <strong key={index} className="font-semibold text-[#1c1917] dark:text-[#f0f6fc]">
-          {part.slice(2, -2)}
-        </strong>
-      );
-    }
-    if (part.startsWith('*') && part.endsWith('*')) {
-      return (
-        <em key={index} className="italic">
-          {part.slice(1, -1)}
-        </em>
-      );
-    }
-    return part;
-  });
-}
-
-// Lightweight block parser
-function parseMarkdownBlocks(raw: string): MarkdownBlock[] {
-  const blocks: MarkdownBlock[] = [];
-  const lines = raw.split('\n');
-  let i = 0;
-
-  while (i < lines.length) {
-    const line = lines[i];
-
-    // Skip empty lines
-    if (!line.trim() || line.trim() === '---') {
-      i++;
-      continue;
-    }
-
-    // Code block
-    if (line.trim().startsWith('```')) {
-      const lang = line.trim().replace(/^```/, '').trim();
-      let codeContent = '';
-      i++;
-      while (i < lines.length && !lines[i].trim().startsWith('```')) {
-        codeContent += lines[i] + '\n';
-        i++;
-      }
-      i++; // skip closing ```
-      blocks.push({
-        type: 'code',
-        language: lang || 'text',
-        content: codeContent
-      });
-      continue;
-    }
-
-    // Headers
-    if (line.startsWith('## ')) {
-      const heading = line.replace('## ', '').trim();
-      const id = heading.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      blocks.push({ type: 'h2', content: heading, id });
-      i++;
-      continue;
-    }
-
-    if (line.startsWith('### ')) {
-      const heading = line.replace('### ', '').trim();
-      const id = heading.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      blocks.push({ type: 'h3', content: heading, id });
-      i++;
-      continue;
-    }
-
-    // Blockquote
-    if (line.startsWith('> ')) {
-      let bqContent = line.replace(/^>\s*/, '');
-      i++;
-      while (i < lines.length && lines[i].startsWith('> ')) {
-        bqContent += ' ' + lines[i].replace(/^>\s*/, '');
-        i++;
-      }
-      blocks.push({ type: 'blockquote', content: bqContent });
-      continue;
-    }
-
-    // Markdown Table
-    if (line.startsWith('|') && line.endsWith('|')) {
-      const headers = line
-        .split('|')
-        .slice(1, -1)
-        .map((h) => h.trim());
-      i++; // skip delimiter line |---|---|
-      if (i < lines.length && lines[i].includes('---')) {
-        i++;
-      }
-      const rows: string[][] = [];
-      while (i < lines.length && lines[i].startsWith('|')) {
-        const row = lines[i]
-          .split('|')
-          .slice(1, -1)
-          .map((c) => c.trim());
-        rows.push(row);
-        i++;
-      }
-      blocks.push({ type: 'table', headers, rows });
-      continue;
-    }
-
-    // Ordered list
-    if (/^\d+\.\s/.test(line)) {
-      const items: string[] = [];
-      while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
-        items.push(lines[i].replace(/^\d+\.\s/, '').trim());
-        i++;
-      }
-      blocks.push({ type: 'olist', items });
-      continue;
-    }
-
-    // Unordered list
-    if (line.startsWith('- ')) {
-      const items: string[] = [];
-      while (i < lines.length && lines[i].startsWith('- ')) {
-        items.push(lines[i].replace(/^- /, '').trim());
-        i++;
-      }
-      blocks.push({ type: 'list', items });
-      continue;
-    }
-
-    // Paragraph
-    let paragraph = line;
-    i++;
-    while (
-      i < lines.length &&
-      lines[i].trim() &&
-      !lines[i].startsWith('#') &&
-      !lines[i].startsWith('```') &&
-      !lines[i].startsWith('> ') &&
-      !lines[i].startsWith('|') &&
-      !lines[i].startsWith('- ') &&
-      !/^\d+\.\s/.test(lines[i])
-    ) {
-      paragraph += ' ' + lines[i].trim();
-      i++;
-    }
-    blocks.push({ type: 'p', content: paragraph });
-  }
-
-  return blocks;
-}

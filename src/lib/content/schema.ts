@@ -1,0 +1,70 @@
+import { z } from 'zod';
+import { TopicId } from '../../types';
+
+export const TopicIdSchema = z.enum([
+  'distributed-systems',
+  'backend-engineering',
+  'performance',
+  'system-design',
+  'cloud-infrastructure',
+  'engineering-experiments',
+  'lessons-learned'
+]);
+
+export const ContentStatusSchema = z.enum(['draft', 'published']);
+
+export const ArticleFrontmatterSchema = z.object({
+  title: z.string().min(1, 'Article title is required'),
+  slug: z.string().min(1, 'Article slug is required').regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
+  description: z.string().min(1, 'Article description is required'),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
+  status: ContentStatusSchema.default('draft'),
+  topic: TopicIdSchema,
+  tags: z.array(z.string()).min(1, 'At least one tag is required'),
+  featured: z.boolean().default(false),
+  relatedArticles: z.array(z.string()).default([]),
+  relatedExperiments: z.array(z.string()).default([]),
+  githubUrl: z.string().url().optional(),
+  coverImage: z.string().optional(),
+  seo: z
+    .object({
+      metaTitle: z.string().optional(),
+      metaDescription: z.string().optional(),
+      canonicalUrl: z.string().optional()
+    })
+    .optional()
+});
+
+export type ArticleFrontmatter = z.infer<typeof ArticleFrontmatterSchema>;
+
+export const ExperimentFrontmatterSchema = z.object({
+  title: z.string().min(1, 'Experiment title is required'),
+  slug: z.string().min(1, 'Experiment slug is required').regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
+  tagline: z.string().min(1, 'Tagline is required'),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
+  status: ContentStatusSchema.default('draft'),
+  topic: TopicIdSchema,
+  hypothesis: z.string().min(1, 'Hypothesis is required'),
+  setup: z.string().min(1, 'Setup description is required'),
+  implementation: z.string().min(1, 'Implementation description is required'),
+  keyFindings: z.array(z.string()).min(1, 'At least one key finding is required'),
+  limitations: z.array(z.string()).default([]),
+  githubRepo: z.string().url('Must be a valid repository URL'),
+  relatedArticleSlug: z.string().optional(),
+  interactiveType: z.enum(['node-threadpool', 'queue-backpressure', 'grpc-multiplex', 'cache-invalidation']).optional()
+});
+
+export type ExperimentFrontmatter = z.infer<typeof ExperimentFrontmatterSchema>;
+
+export interface ArticleDocument {
+  frontmatter: ArticleFrontmatter;
+  rawContent: string;
+  readingTime: string;
+  wordCount: number;
+  toc: { id: string; title: string; level: number }[];
+}
+
+export interface ExperimentDocument {
+  frontmatter: ExperimentFrontmatter;
+  rawContent: string;
+}

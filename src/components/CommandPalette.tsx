@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Search, X, BookOpen, FlaskConical, ArrowRight } from 'lucide-react';
-import { ARTICLES } from '../data/articles';
-import { EXPERIMENTS } from '../data/experiments';
+import { getArticles, getExperiments, toArticle, toExperiment } from '../lib/content';
 import { ViewRoute } from '../types';
 
 interface CommandPaletteProps {
@@ -20,6 +19,7 @@ interface SearchResult {
   topic: string;
   slug: string;
   tags?: string[];
+  isDraft?: boolean;
 }
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({
@@ -31,14 +31,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const articles = useMemo(() => getArticles().map(toArticle), [isOpen]);
+  const experiments = useMemo(() => getExperiments().map(toExperiment), [isOpen]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         if (isOpen) {
           onClose();
-        } else {
-          // Trigger open if parent handles or focus
         }
       }
       if (e.key === 'Escape' && isOpen) {
@@ -59,11 +60,11 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
   const cleanQuery = query.toLowerCase().trim();
 
-  const results: SearchResult[] = React.useMemo(() => {
+  const results: SearchResult[] = useMemo(() => {
     const items: SearchResult[] = [];
 
     // Articles
-    ARTICLES.forEach((a) => {
+    articles.forEach((a) => {
       let score = 0;
       let matchedSnippet = '';
       const titleLower = a.title.toLowerCase();
@@ -95,13 +96,14 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           snippet: matchedSnippet,
           topic: a.topic,
           slug: a.slug,
-          tags: a.tags
+          tags: a.tags,
+          isDraft: a.draft
         });
       }
     });
 
     // Experiments
-    EXPERIMENTS.forEach((e) => {
+    experiments.forEach((e) => {
       let score = 0;
       const titleLower = e.title.toLowerCase();
       const tagLower = e.tagline.toLowerCase();
@@ -122,13 +124,14 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           title: e.title,
           description: e.tagline,
           topic: e.topic,
-          slug: e.slug
+          slug: e.slug,
+          isDraft: e.status === 'draft'
         });
       }
     });
 
     return items;
-  }, [cleanQuery]);
+  }, [articles, experiments, cleanQuery]);
 
   const handleSelect = (result: SearchResult) => {
     onClose();
@@ -197,7 +200,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
             <div className="py-12 text-center text-sm text-[#78716c] dark:text-[#8b949e]">
               No results found for &ldquo;{query}&rdquo;.
               <div className="text-xs text-[#a8a29e] dark:text-[#6e7681] mt-2">
-                Try searching for &ldquo;backpressure&rdquo;, &ldquo;grpc&rdquo;, &ldquo;queue&rdquo;, or &ldquo;retries&rdquo;.
+                Try searching for &ldquo;nodejs&rdquo;, &ldquo;concurrency&rdquo;, &ldquo;event loop&rdquo;, or &ldquo;threadpool&rdquo;.
               </div>
             </div>
           ) : (
@@ -229,6 +232,14 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       )}
                       <span className="text-[#a8a29e] dark:text-[#6e7681]">·</span>
                       <span className="capitalize">{item.topic.replace(/-/g, ' ')}</span>
+                      {item.isDraft && (
+                        <>
+                          <span className="text-[#a8a29e] dark:text-[#6e7681]">·</span>
+                          <span className="text-amber-700 dark:text-amber-400 font-mono text-[11px] font-semibold">
+                            [Draft]
+                          </span>
+                        </>
+                      )}
                     </div>
                     {isSelected && (
                       <ArrowRight className="w-3.5 h-3.5 text-sky-500 shrink-0" />

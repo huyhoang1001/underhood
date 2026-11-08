@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Search, X, BookOpen, Filter } from 'lucide-react';
-import { ARTICLES } from '../data/articles';
+import { Search, X, BookOpen, Rss, Clock } from 'lucide-react';
+import { getArticles, toArticle } from '../lib/content';
 import { TOPIC_LIST } from '../data/topics';
 import { ViewRoute, TopicId } from '../types';
 
@@ -8,26 +8,30 @@ interface WritingViewProps {
   initialTopic?: TopicId;
   initialTag?: string;
   onNavigate: (route: ViewRoute) => void;
+  onOpenRss?: () => void;
 }
 
 export const WritingView: React.FC<WritingViewProps> = ({
   initialTopic,
   initialTag,
-  onNavigate
+  onNavigate,
+  onOpenRss
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTopic, setSelectedTopic] = useState<string>(initialTopic || 'all');
   const [selectedTag, setSelectedTag] = useState<string>(initialTag || 'all');
 
+  const articles = useMemo(() => getArticles().map(toArticle), []);
+
   // Extract all unique tags
   const allTags = useMemo(() => {
     const set = new Set<string>();
-    ARTICLES.forEach((a) => a.tags.forEach((t) => set.add(t)));
-    return Array.from(set);
-  }, []);
+    articles.forEach((a) => a.tags.forEach((t) => set.add(t)));
+    return Array.from(set).sort();
+  }, [articles]);
 
   const filteredArticles = useMemo(() => {
-    return ARTICLES.filter((article) => {
+    return articles.filter((article) => {
       // Topic filter
       if (selectedTopic !== 'all' && article.topic !== selectedTopic) {
         return false;
@@ -49,7 +53,51 @@ export const WritingView: React.FC<WritingViewProps> = ({
       }
       return true;
     });
-  }, [selectedTopic, selectedTag, searchQuery]);
+  }, [articles, selectedTopic, selectedTag, searchQuery]);
+
+  // Graceful empty state when zero articles are published
+  if (articles.length === 0) {
+    return (
+      <div className="py-16 sm:py-24 space-y-8 max-w-2xl mx-auto text-center">
+        <div className="inline-flex p-3 rounded-full bg-sky-500/10 text-sky-500">
+          <BookOpen className="w-8 h-8" />
+        </div>
+        <div className="space-y-3">
+          <h1 className="text-3xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc]">
+            Writing & Engineering Essays
+          </h1>
+          <p className="text-sm sm:text-base text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+            Underhood&apos;s upcoming technical investigations and reproducibility benchmarks are currently in draft review and peer reproduction.
+          </p>
+        </div>
+        <div className="p-6 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#fdfdfc] dark:bg-[#161b22] text-xs space-y-3 text-left">
+          <div className="font-mono uppercase tracking-wider text-sky-600 dark:text-sky-400 font-semibold text-[11px]">
+            Editorial Standards
+          </div>
+          <p className="text-[#44403c] dark:text-[#c9d1d9] leading-relaxed">
+            Every publication on Underhood requires automated test harnesses, measurable latency distributions, and verifiable system traces. We do not publish speculative content without empirical evidence.
+          </p>
+          <div className="pt-2 flex items-center gap-3">
+            {onOpenRss && (
+              <button
+                onClick={onOpenRss}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-500 rounded-md transition-colors"
+              >
+                <Rss className="w-3.5 h-3.5" />
+                <span>Subscribe via RSS</span>
+              </button>
+            )}
+            <button
+              onClick={() => onNavigate({ view: 'about' })}
+              className="text-xs text-sky-600 dark:text-sky-400 hover:underline font-medium"
+            >
+              Learn about our editorial philosophy →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-10 py-8 sm:py-12">
@@ -59,7 +107,7 @@ export const WritingView: React.FC<WritingViewProps> = ({
           Writing
         </h1>
         <p className="text-sm sm:text-base text-[#78716c] dark:text-[#8b949e] leading-relaxed">
-          Essays, architectural retrospectives, and deep technical analyses across distributed systems, protocols, and performance engineering.
+          Essays, architectural retrospectives, and deep technical analyses across distributed systems, runtime internals, and performance engineering.
         </p>
       </div>
 
@@ -85,7 +133,7 @@ export const WritingView: React.FC<WritingViewProps> = ({
           )}
         </div>
 
-        {/* Clean Topic Buttons (Functional segmented buttons) */}
+        {/* Clean Topic Buttons */}
         <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
           <button
             onClick={() => setSelectedTopic('all')}
@@ -95,10 +143,10 @@ export const WritingView: React.FC<WritingViewProps> = ({
                 : 'text-[#78716c] dark:text-[#8b949e] hover:text-[#1c1917] dark:hover:text-[#f0f6fc] bg-[#f2ede4] dark:bg-[#161b22] border border-[#e7e3da] dark:border-[#30363d]'
             }`}
           >
-            All Topics ({ARTICLES.length})
+            All Topics ({articles.length})
           </button>
           {TOPIC_LIST.map((topic) => {
-            const count = ARTICLES.filter((a) => a.topic === topic.id).length;
+            const count = articles.filter((a) => a.topic === topic.id).length;
             if (count === 0) return null;
             return (
               <button
@@ -116,8 +164,8 @@ export const WritingView: React.FC<WritingViewProps> = ({
           })}
         </div>
 
-        {/* Tag Filters (Optional refined filtering) */}
-        {selectedTopic === 'all' && (
+        {/* Tag Filters */}
+        {selectedTopic === 'all' && allTags.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 pt-2 text-xs text-[#78716c] dark:text-[#8b949e]">
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#a8a29e] dark:text-[#6e7681]">
               Tags:
@@ -146,7 +194,7 @@ export const WritingView: React.FC<WritingViewProps> = ({
       {/* Articles List */}
       <div className="space-y-6">
         <div className="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d] text-xs font-mono text-[#78716c] dark:text-[#8b949e]">
-          <span>Showing {filteredArticles.length} published essays</span>
+          <span>Showing {filteredArticles.length} {filteredArticles.length === 1 ? 'essay' : 'essays'}</span>
           <span>Sorted by Publication Date</span>
         </div>
 

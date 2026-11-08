@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Copy, Check, Rss } from 'lucide-react';
-import { ARTICLES } from '../data/articles';
+import { getArticles, toArticle } from '../lib/content';
 
 interface RssModalProps {
   isOpen: boolean;
@@ -12,6 +12,9 @@ export const RssModal: React.FC<RssModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
+  // Strict draft exclusion: RSS feed only includes published articles
+  const publishedArticles = getArticles({ includeDrafts: false }).map(toArticle);
+
   // Generate authentic RSS 2.0 XML
   const rssXml = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -22,7 +25,7 @@ export const RssModal: React.FC<RssModalProps> = ({ isOpen, onClose }) => {
   <language>en-us</language>
   <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
   <atom:link href="https://underhood.engineering/rss.xml" rel="self" type="application/rss+xml" />
-${ARTICLES.map(
+${publishedArticles.map(
   (a) => `  <item>
     <title>${a.title}</title>
     <link>https://underhood.engineering/writing/${a.slug}</link>
@@ -41,7 +44,7 @@ ${ARTICLES.map(
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback
+      // Clipboard fallback
     }
   };
 

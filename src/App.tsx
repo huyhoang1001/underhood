@@ -11,58 +11,105 @@ import { ArticleView } from './views/ArticleView';
 import { TopicsView } from './views/TopicsView';
 import { ExperimentsView } from './views/ExperimentsView';
 import { AboutView } from './views/AboutView';
+import { NotFoundView } from './views/NotFoundView';
 import { ViewRoute, TopicId } from './types';
+import { getArticleBySlug, getExperimentBySlug } from './lib/content';
+
+/**
+ * Resolves browser URL pathname or hash to a typed ViewRoute.
+ * Validates slugs and gracefully routes missing content to 404.
+ */
+function resolveRouteFromLocation(): ViewRoute {
+  if (typeof window === 'undefined') {
+    return { view: 'home' };
+  }
+
+  // Support both clean pathname and legacy hash fallback
+  let path = window.location.pathname;
+  if ((!path || path === '/') && window.location.hash) {
+    path = '/' + window.location.hash.replace(/^#\/?/, '');
+  }
+
+  // Normalize path
+  const normalized = path.replace(/\/+$/, '') || '/';
+  const parts = normalized.split('/').filter(Boolean);
+
+  if (parts.length === 0 || normalized === '/') {
+    return { view: 'home' };
+  }
+
+  if (parts[0] === 'writing') {
+    if (parts[1]) {
+      const slug = parts[1];
+      const article = getArticleBySlug(slug);
+      if (!article) {
+        return { view: 'not-found', path: normalized };
+      }
+      return { view: 'article', slug };
+    }
+    return { view: 'writing' };
+  }
+
+  if (parts[0] === 'topics') {
+    if (parts[1]) {
+      return { view: 'topics', topicId: parts[1] as TopicId };
+    }
+    return { view: 'topics' };
+  }
+
+  if (parts[0] === 'experiments') {
+    if (parts[1]) {
+      const slug = parts[1];
+      const exp = getExperimentBySlug(slug);
+      if (!exp) {
+        return { view: 'not-found', path: normalized };
+      }
+      return { view: 'experiments', slug };
+    }
+    return { view: 'experiments' };
+  }
+
+  if (parts[0] === 'about') {
+    return { view: 'about' };
+  }
+
+  return { view: 'not-found', path: normalized };
+}
+
+/**
+ * Builds clean URL pathname from ViewRoute
+ */
+function routeToPath(route: ViewRoute): string {
+  switch (route.view) {
+    case 'home':
+      return '/';
+    case 'writing':
+      return '/writing';
+    case 'article':
+      return `/writing/${route.slug}`;
+    case 'topics':
+      return route.topicId ? `/topics/${route.topicId}` : '/topics';
+    case 'experiments':
+      return route.slug ? `/experiments/${route.slug}` : '/experiments';
+    case 'about':
+      return '/about';
+    case 'not-found':
+      return route.path || '/404';
+  }
+}
 
 export default function App() {
-  const [currentRoute, setCurrentRoute] = useState<ViewRoute>(() => {
-    // Parse initial URL hash if present
-    if (typeof window !== 'undefined' && window.location.hash) {
-      const hash = window.location.hash.replace(/^#\/?/, '');
-      const parts = hash.split('/');
-
-      if (parts[0] === 'writing' && parts[1]) {
-        return { view: 'article', slug: parts[1] };
-      }
-      if (parts[0] === 'writing') {
-        return { view: 'writing' };
-      }
-      if (parts[0] === 'topics' && parts[1]) {
-        return { view: 'topics', topicId: parts[1] as TopicId };
-      }
-      if (parts[0] === 'topics') {
-        return { view: 'topics' };
-      }
-      if (parts[0] === 'experiments' && parts[1]) {
-        return { view: 'experiments', slug: parts[1] };
-      }
-      if (parts[0] === 'experiments') {
-        return { view: 'experiments' };
-      }
-      if (parts[0] === 'about') {
-        return { view: 'about' };
-      }
-    }
-    return { view: 'home' };
-  });
-
+  const [currentRoute, setCurrentRoute] = useState<ViewRoute>(() => resolveRouteFromLocation());
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isRssOpen, setIsRssOpen] = useState(false);
 
-  // Sync hash on navigation
+  // Navigate handler updating route and browser history
   const handleNavigate = (route: ViewRoute) => {
     setCurrentRoute(route);
-    let hash = '';
-    if (route.view === 'home') hash = '';
-    else if (route.view === 'writing') hash = '#writing';
-    else if (route.view === 'article') hash = `#writing/${route.slug}`;
-    else if (route.view === 'topics') {
-      hash = route.topicId ? `#topics/${route.topicId}` : '#topics';
-    } else if (route.view === 'experiments') {
-      hash = route.slug ? `#experiments/${route.slug}` : '#experiments';
-    } else if (route.view === 'about') hash = '#about';
+    const newPath = routeToPath(route);
 
-    if (window.location.hash !== hash) {
-      window.history.pushState(null, '', hash || window.location.pathname);
+    if (window.location.pathname !== newPath) {
+      window.history.pushState(null, '', newPath);
     }
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -70,26 +117,7 @@ export default function App() {
   // Listen to browser popstate (back/forward navigation)
   useEffect(() => {
     const handlePopState = () => {
-      const hash = window.location.hash.replace(/^#\/?/, '');
-      const parts = hash.split('/');
-
-      if (parts[0] === 'writing' && parts[1]) {
-        setCurrentRoute({ view: 'article', slug: parts[1] });
-      } else if (parts[0] === 'writing') {
-        setCurrentRoute({ view: 'writing' });
-      } else if (parts[0] === 'topics' && parts[1]) {
-        setCurrentRoute({ view: 'topics', topicId: parts[1] as TopicId });
-      } else if (parts[0] === 'topics') {
-        setCurrentRoute({ view: 'topics' });
-      } else if (parts[0] === 'experiments' && parts[1]) {
-        setCurrentRoute({ view: 'experiments', slug: parts[1] });
-      } else if (parts[0] === 'experiments') {
-        setCurrentRoute({ view: 'experiments' });
-      } else if (parts[0] === 'about') {
-        setCurrentRoute({ view: 'about' });
-      } else {
-        setCurrentRoute({ view: 'home' });
-      }
+      setCurrentRoute(resolveRouteFromLocation());
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -126,13 +154,17 @@ export default function App() {
           {/* Main Content Viewport */}
           <main className="max-w-6xl mx-auto px-4 sm:px-6 w-full">
             {currentRoute.view === 'home' && (
-              <HomeView onNavigate={handleNavigate} />
+              <HomeView
+                onNavigate={handleNavigate}
+                onOpenRss={() => setIsRssOpen(true)}
+              />
             )}
             {currentRoute.view === 'writing' && (
               <WritingView
                 initialTopic={currentRoute.topic}
                 initialTag={currentRoute.tag}
                 onNavigate={handleNavigate}
+                onOpenRss={() => setIsRssOpen(true)}
               />
             )}
             {currentRoute.view === 'article' && (
@@ -157,6 +189,12 @@ export default function App() {
               <AboutView
                 onNavigate={handleNavigate}
                 onOpenRss={() => setIsRssOpen(true)}
+              />
+            )}
+            {currentRoute.view === 'not-found' && (
+              <NotFoundView
+                path={currentRoute.path}
+                onNavigate={handleNavigate}
               />
             )}
           </main>

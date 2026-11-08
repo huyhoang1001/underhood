@@ -7,10 +7,9 @@ import {
   AlertCircle,
   BookOpen,
   ArrowRight,
-  Sliders,
-  Terminal
+  Sliders
 } from 'lucide-react';
-import { EXPERIMENTS } from '../data/experiments';
+import { getExperiments, toExperiment, getExperimentBySlug } from '../lib/content';
 import { ExperimentVisualizer } from '../components/ExperimentVisualizer';
 import { ViewRoute } from '../types';
 
@@ -23,9 +22,37 @@ export const ExperimentsView: React.FC<ExperimentsViewProps> = ({
   slug,
   onNavigate
 }) => {
+  const experiments = getExperiments().map(toExperiment);
+
   // If viewing a specific experiment report
   if (slug) {
-    const experiment = EXPERIMENTS.find((e) => e.slug === slug) || EXPERIMENTS[0];
+    const doc = getExperimentBySlug(slug);
+    if (!doc) {
+      return (
+        <div className="py-16 sm:py-24 text-center max-w-xl mx-auto space-y-6">
+          <div className="inline-flex p-3 rounded-full bg-amber-500/10 text-amber-500">
+            <AlertCircle className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1c1917] dark:text-[#f0f6fc]">
+            Experiment Not Found
+          </h1>
+          <p className="text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+            The requested laboratory experiment &ldquo;{slug}&rdquo; does not exist or has not been published.
+          </p>
+          <div>
+            <button
+              onClick={() => onNavigate({ view: 'experiments' })}
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-sky-600 hover:bg-sky-500 rounded-md transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Return to Experiments Lab</span>
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    const experiment = toExperiment(doc);
 
     return (
       <div className="py-8 sm:py-12 space-y-10">
@@ -45,6 +72,14 @@ export const ExperimentsView: React.FC<ExperimentsViewProps> = ({
             </span>
             <span>·</span>
             <span>Lab Test Run: {experiment.date}</span>
+            {experiment.status === 'draft' && (
+              <>
+                <span>·</span>
+                <span className="font-mono text-amber-700 dark:text-amber-400 font-semibold text-[11px] uppercase tracking-wider">
+                  [Local Review Draft]
+                </span>
+              </>
+            )}
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc] leading-tight">
@@ -139,18 +174,55 @@ export const ExperimentsView: React.FC<ExperimentsViewProps> = ({
         </div>
 
         {/* Limitations */}
-        <div className="space-y-3 pt-4">
-          <h2 className="text-base font-bold text-[#1c1917] dark:text-[#f0f6fc] uppercase tracking-wider font-mono text-xs">
-            Measurement Invariants & Limitations
-          </h2>
-          <ul className="space-y-2 text-xs sm:text-sm text-[#78716c] dark:text-[#8b949e]">
-            {experiment.limitations.map((limit, idx) => (
-              <li key={idx} className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                <span>{limit}</span>
-              </li>
-            ))}
-          </ul>
+        {experiment.limitations.length > 0 && (
+          <div className="space-y-3 pt-4">
+            <h2 className="text-base font-bold text-[#1c1917] dark:text-[#f0f6fc] uppercase tracking-wider font-mono text-xs">
+              Measurement Invariants & Limitations
+            </h2>
+            <ul className="space-y-2 text-xs sm:text-sm text-[#78716c] dark:text-[#8b949e]">
+              {experiment.limitations.map((limit, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                  <span>{limit}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Graceful empty state when zero experiments are published
+  if (experiments.length === 0) {
+    return (
+      <div className="py-16 sm:py-24 space-y-8 max-w-2xl mx-auto text-center">
+        <div className="inline-flex p-3 rounded-full bg-sky-500/10 text-sky-500">
+          <FlaskConical className="w-8 h-8" />
+        </div>
+        <div className="space-y-3">
+          <h1 className="text-3xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc]">
+            Engineering Laboratory
+          </h1>
+          <p className="text-sm sm:text-base text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+            Laboratory experiments and reproducible harness benchmarks are currently in draft verification.
+          </p>
+        </div>
+        <div className="p-6 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#fdfdfc] dark:bg-[#161b22] text-xs space-y-3 text-left">
+          <div className="font-mono uppercase tracking-wider text-sky-600 dark:text-sky-400 font-semibold text-[11px]">
+            Reproduction Protocol
+          </div>
+          <p className="text-[#44403c] dark:text-[#c9d1d9] leading-relaxed">
+            All experiments must include standalone, runnable scripts that reproduce results across independent Linux environments before publication.
+          </p>
+          <div className="pt-2">
+            <button
+              onClick={() => onNavigate({ view: 'writing' })}
+              className="text-xs text-sky-600 dark:text-sky-400 hover:underline font-medium"
+            >
+              Explore writing section →
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -168,12 +240,12 @@ export const ExperimentsView: React.FC<ExperimentsViewProps> = ({
           Experiments
         </h1>
         <p className="text-sm sm:text-base text-[#78716c] dark:text-[#8b949e] leading-relaxed">
-          Reproducible empirical investigations into queue dynamics, socket backlogs, stream multiplexing saturation, and cache stampede mitigations.
+          Reproducible empirical investigations into runtime internals, thread pool saturation, event loop delay, and concurrency limits.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        {EXPERIMENTS.map((exp) => (
+        {experiments.map((exp) => (
           <article
             key={exp.slug}
             onClick={() => onNavigate({ view: 'experiments', slug: exp.slug })}
@@ -183,9 +255,14 @@ export const ExperimentsView: React.FC<ExperimentsViewProps> = ({
               <span className="font-mono text-sky-600 dark:text-sky-400 uppercase tracking-wider text-[11px]">
                 {exp.topic.replace(/-/g, ' ')}
               </span>
-              <span className="text-[#a8a29e] dark:text-[#6e7681] font-mono">
-                Lab Run: {exp.date}
-              </span>
+              <div className="flex items-center gap-2 font-mono text-[#a8a29e] dark:text-[#6e7681]">
+                <span>Lab Run: {exp.date}</span>
+                {exp.status === 'draft' && (
+                  <span className="text-amber-700 dark:text-amber-400 font-semibold">
+                    [Draft]
+                  </span>
+                )}
+              </div>
             </div>
 
             <h2 className="text-xl sm:text-2xl font-bold text-[#1c1917] dark:text-[#f0f6fc] group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">

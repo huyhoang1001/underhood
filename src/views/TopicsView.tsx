@@ -1,8 +1,7 @@
 import React from 'react';
-import { ArrowLeft, BookOpen, Layers, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { TOPIC_LIST, TOPICS } from '../data/topics';
-import { ARTICLES } from '../data/articles';
-import { EXPERIMENTS } from '../data/experiments';
+import { getArticles, getExperiments, toArticle, toExperiment } from '../lib/content';
 import { ViewRoute, TopicId } from '../types';
 
 interface TopicsViewProps {
@@ -14,11 +13,14 @@ export const TopicsView: React.FC<TopicsViewProps> = ({
   activeTopicId,
   onNavigate
 }) => {
+  const allArticles = getArticles().map(toArticle);
+  const allExperiments = getExperiments().map(toExperiment);
+
   // If viewing a specific topic
   if (activeTopicId && TOPICS[activeTopicId]) {
     const topic = TOPICS[activeTopicId];
-    const topicArticles = ARTICLES.filter((a) => a.topic === activeTopicId);
-    const topicExperiments = EXPERIMENTS.filter((e) => e.topic === activeTopicId);
+    const topicArticles = allArticles.filter((a) => a.topic === activeTopicId);
+    const topicExperiments = allExperiments.filter((e) => e.topic === activeTopicId);
 
     return (
       <div className="py-8 sm:py-12 space-y-10">
@@ -49,8 +51,11 @@ export const TopicsView: React.FC<TopicsViewProps> = ({
           </div>
 
           {topicArticles.length === 0 ? (
-            <div className="py-12 text-center text-sm text-[#78716c] dark:text-[#8b949e]">
-              No articles currently published in this domain. Upcoming research notes are in peer review.
+            <div className="py-12 text-center text-sm text-[#78716c] dark:text-[#8b949e] max-w-lg mx-auto space-y-2">
+              <p>No articles are currently published in this domain.</p>
+              <p className="text-xs text-[#a8a29e] dark:text-[#6e7681]">
+                Upcoming technical investigations and reproducible benchmarks for {topic.name} are in peer review.
+              </p>
             </div>
           ) : (
             <div className="divide-y divide-[#e7e3da] dark:divide-[#30363d]">
@@ -64,6 +69,14 @@ export const TopicsView: React.FC<TopicsViewProps> = ({
                     <span>{article.date}</span>
                     <span>·</span>
                     <span>{article.readingTime}</span>
+                    {article.draft && (
+                      <>
+                        <span>·</span>
+                        <span className="font-mono text-amber-700 dark:text-amber-400 font-semibold text-[11px] uppercase tracking-wider">
+                          [Draft]
+                        </span>
+                      </>
+                    )}
                   </div>
                   <h3 className="text-xl font-bold text-[#1c1917] dark:text-[#f0f6fc] group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
                     {article.title}
@@ -122,8 +135,8 @@ export const TopicsView: React.FC<TopicsViewProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {TOPIC_LIST.map((topic) => {
-          const articles = ARTICLES.filter((a) => a.topic === topic.id);
-          const experiments = EXPERIMENTS.filter((e) => e.topic === topic.id);
+          const articles = allArticles.filter((a) => a.topic === topic.id);
+          const experiments = allExperiments.filter((e) => e.topic === topic.id);
           return (
             <div
               key={topic.id}
@@ -136,7 +149,7 @@ export const TopicsView: React.FC<TopicsViewProps> = ({
                     Domain
                   </span>
                   <div className="flex items-center gap-2 text-xs font-mono text-[#a8a29e] dark:text-[#6e7681]">
-                    <span>{articles.length} essays</span>
+                    <span>{articles.length} {articles.length === 1 ? 'essay' : 'essays'}</span>
                     {experiments.length > 0 && (
                       <>
                         <span>·</span>

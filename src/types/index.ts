@@ -31,6 +31,7 @@ export interface Article {
   tags: string[];
   featured?: boolean;
   draft?: boolean;
+  status?: 'draft' | 'published';
   githubUrl?: string;
   content: string;
   toc: TocItem[];
@@ -42,6 +43,7 @@ export interface Experiment {
   title: string;
   tagline: string;
   date: string;
+  status?: 'draft' | 'published';
   topic: TopicId;
   hypothesis: string;
   setup: string;
@@ -50,7 +52,7 @@ export interface Experiment {
   limitations: string[];
   githubRepo: string;
   relatedArticleSlug?: string;
-  interactiveType: 'queue-backpressure' | 'grpc-multiplex' | 'cache-invalidation' | 'node-threadpool';
+  interactiveType?: 'queue-backpressure' | 'grpc-multiplex' | 'cache-invalidation' | 'node-threadpool';
 }
 
 export interface AuthorProfile {
@@ -85,4 +87,5 @@ export type ViewRoute =
   | { view: 'article'; slug: string }
   | { view: 'topics'; topicId?: TopicId }
   | { view: 'experiments'; slug?: string }
-  | { view: 'about' };
+  | { view: 'about' }
+  | { view: 'not-found'; path?: string };

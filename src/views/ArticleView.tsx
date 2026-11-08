@@ -18,6 +18,8 @@ import { ArchitectureDiagram } from '../components/ArchitectureDiagram';
 import { Callout } from '../components/Callout';
 import { TableOfContents } from '../components/TableOfContents';
 import { calculateReadingTime } from '../utils/readingTime';
+import { NodeProcessDiagram } from '../components/NodeProcessDiagram';
+import { NodeThreadpoolVisualizer } from '../components/NodeThreadpoolVisualizer';
 
 interface ArticleViewProps {
   slug: string;
@@ -89,6 +91,14 @@ export const ArticleView: React.FC<ArticleViewProps> = ({ slug, onNavigate }) =>
               ({readingStats.words.toLocaleString()} words @ 200 wpm)
             </span>
           </span>
+          {article.draft && (
+            <>
+              <span>·</span>
+              <span className="font-mono text-amber-700 dark:text-amber-400 font-semibold text-[11px] uppercase tracking-wider">
+                [Local Review Draft]
+              </span>
+            </>
+          )}
         </div>
 
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc] leading-tight text-balance">
@@ -283,6 +293,14 @@ function RenderArticleContent({
       {/* If this is the backpressure article, mount interactive architecture topology diagram */}
       {slug === 'backpressure-is-not-an-overload-policy' && (
         <ArchitectureDiagram />
+      )}
+
+      {/* If this is the Node.js concurrency article, mount interactive Node.js runtime process diagram and threadpool visualizer */}
+      {slug === 'node-js-is-single-threaded-who-is-doing-the-work' && (
+        <>
+          <NodeProcessDiagram />
+          <NodeThreadpoolVisualizer />
+        </>
       )}
 
       {tokens.map((block, idx) => {

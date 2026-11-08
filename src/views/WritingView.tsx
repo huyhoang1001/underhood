@@ -183,6 +183,14 @@ export const WritingView: React.FC<WritingViewProps> = ({
                   <span>{article.date}</span>
                   <span>·</span>
                   <span>{article.readingTime}</span>
+                  {article.draft && (
+                    <>
+                      <span>·</span>
+                      <span className="font-mono text-amber-700 dark:text-amber-400 font-semibold text-[11px] uppercase tracking-wider">
+                        [Local Review Draft]
+                      </span>
+                    </>
+                  )}
                 </div>
 
                 <h2 className="text-xl sm:text-2xl font-bold text-[#1c1917] dark:text-[#f0f6fc] group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">

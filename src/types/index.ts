@@ -50,7 +50,7 @@ export interface Experiment {
   limitations: string[];
   githubRepo: string;
   relatedArticleSlug?: string;
-  interactiveType: 'queue-backpressure' | 'grpc-multiplex' | 'cache-invalidation';
+  interactiveType: 'queue-backpressure' | 'grpc-multiplex' | 'cache-invalidation' | 'node-threadpool';
 }
 
 export interface AuthorProfile {

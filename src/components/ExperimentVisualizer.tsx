@@ -1,11 +1,16 @@
 import React, { useState, useId } from 'react';
 import { Sliders, Activity, Zap, ShieldAlert, CheckCircle2 } from 'lucide-react';
 
+import { NodeThreadpoolVisualizer } from './NodeThreadpoolVisualizer';
+
 interface ExperimentVisualizerProps {
-  type: 'queue-backpressure' | 'grpc-multiplex' | 'cache-invalidation';
+  type: 'queue-backpressure' | 'grpc-multiplex' | 'cache-invalidation' | 'node-threadpool';
 }
 
 export const ExperimentVisualizer: React.FC<ExperimentVisualizerProps> = ({ type }) => {
+  if (type === 'node-threadpool') {
+    return <NodeThreadpoolVisualizer />;
+  }
   if (type === 'queue-backpressure') {
     return <QueueBackpressureVisualizer />;
   }

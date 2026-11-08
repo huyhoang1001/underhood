@@ -543,6 +543,476 @@ Circuit breakers must trigger on **concurrency saturation**, not just trailing e
 ### 4. Client Request Deadlines
 Every RPC carries a monotonic deadline timestamp in its metadata. If an intermediate hop sees that remaining time is insufficient to complete the operation, it drops the request immediately without forwarding it to the database.
     `
+  },
+  {
+    slug: 'node-js-is-single-threaded-who-is-doing-the-work',
+    title: "Node.js Is Single-Threaded. So Who's Doing the Work?",
+    description: "A hands-on journey through the Event Loop, libuv Thread Pool, and the hidden concurrency behind Node.js.",
+    date: '2026-11-08',
+    topic: 'backend-engineering',
+    tags: ['nodejs', 'concurrency', 'libuv', 'event-loop', 'performance', 'backend-engineering'],
+    featured: false,
+    draft: true,
+    githubUrl: 'https://github.com/huyhoang1001/underhood/tree/main/experiments/node-concurrency',
+    toc: [
+      { id: 'the-contradiction', title: "The Contradiction: If It's Single-Threaded, Who Did That?", level: 2 },
+      { id: 'what-single-threaded-actually-means', title: 'Part 1: What "Single-Threaded" Actually Means', level: 2 },
+      { id: 'meet-libuv-the-hidden-runtime', title: 'Part 2: Meet libuv, the Hidden Engine', level: 2 },
+      { id: 'the-four-worker-experiment', title: 'Part 3: The Four-Worker Experiment (Thread Pool Saturation)', level: 2 },
+      { id: 'the-surprising-network-case', title: 'Part 4: The Surprising Network Case (epoll vs. Thread Pools)', level: 2 },
+      { id: 'promise-all-is-not-parallel', title: 'Part 5: Promise.all() Is Not a Parallel Execution Engine', level: 2 },
+      { id: 'blocking-the-event-loop', title: 'Part 6: What Happens When the Main Thread Is Blocked?', level: 2 },
+      { id: 'when-to-use-worker-threads', title: 'Part 7: When Should We Use Worker Threads?', level: 2 },
+      { id: 'the-production-decision-guide', title: 'Part 8: The Production Decision Guide', level: 2 },
+      { id: 'the-corrected-mental-model', title: 'Conclusion: The Corrected Mental Model', level: 2 }
+    ],
+    relatedSlugs: ['backpressure-is-not-an-overload-policy', 'understanding-grpc-flow-control', 'what-happens-when-a-queue-grows-without-bounds'],
+    content: `
+Every backend engineer has heard the mantra: *"Node.js is single-threaded."* 
+
+We repeat it in job interviews. We explain it to junior developers. We nod along when conference speakers explain how the Event Loop enables Node.js to serve tens of thousands of concurrent requests without thread-per-request overhead.
+
+And yet, if you inspect a running Node.js process using \`top -H -p <pid>\` or \`htop\` on Linux, you will notice something unsettling:
+
+\`\`\`
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+14820 node      20   0  782412  85420  34112 S   0.0   0.5   0:00.12 node (Thread 1: Main JS)
+14821 node      20   0  782412  85420  34112 S   0.0   0.5   0:00.00 node (Thread 2: libuv worker)
+14822 node      20   0  782412  85420  34112 S   0.0   0.5   0:00.00 node (Thread 3: libuv worker)
+14823 node      20   0  782412  85420  34112 S   0.0   0.5   0:00.00 node (Thread 4: libuv worker)
+14824 node      20   0  782412  85420  34112 S   0.0   0.5   0:00.00 node (Thread 5: libuv worker)
+14825 node      20   0  782412  85420  34112 S   0.0   0.5   0:00.00 node (Thread 6: V8 background)
+14826 node      20   0  782412  85420  34112 S   0.0   0.5   0:00.00 node (Thread 7: V8 background)
+\`\`\`
+
+A bare Node.js process does not have one operating system thread. It routinely spawns **7 to 11 OS threads** before you have written a single line of business logic.
+
+So what does "single-threaded" actually mean? When you invoke \`fs.readFile()\`, hash a password with \`crypto.pbkdf2()\`, query PostgreSQL via \`pg\`, or handle 5,000 incoming HTTP connections simultaneously, **who is actually doing the work?**
+
+Let's dismantle the abstractions and measure reality through reproducible experiments.
+
+---
+
+## The Contradiction: If It's Single-Threaded, Who Did That?
+
+Consider this routine code snippet in an authentication microservice:
+
+\`\`\`javascript
+app.post('/register', async (req, res) => {
+  // 1. Password hashing (CPU-heavy crypto)
+  const passwordHash = await hashPassword(req.body.password);
+  
+  // 2. File write (disk I/O)
+  await fs.promises.writeFile(\`/audit/\${req.body.email}.log\`, 'Account created');
+  
+  // 3. Database query (network socket)
+  await db.query('INSERT INTO users(email, hash) VALUES($1, $2)', [req.body.email, passwordHash]);
+  
+  res.json({ status: 'created' });
+});
+\`\`\`
+
+If JavaScript runs on one thread, how can a single Node.js process handle 500 engineers hitting this endpoint simultaneously without:
+1. One user's password hash freezing all other incoming requests?
+2. A slow disk write halting the entire server?
+3. A database query consuming 100% of an OS thread while waiting for PostgreSQL?
+
+The answer is that **Node.js is not an engine; it is an orchestra.** 
+
+JavaScript execution is single-threaded. The Node.js runtime is massively multi-threaded.
+
+---
+
+## Part 1: What "Single-Threaded" Actually Means
+
+To understand the runtime, we must draw a strict boundary between three layers:
+
+\`\`\`
+┌────────────────────────────────────────────────────────┐
+│               Your Application JavaScript              │  <── Single Call Stack
+└───────────────────────────┬────────────────────────────┘
+                            │ V8 JavaScript Engine
+┌───────────────────────────▼────────────────────────────┐
+│                  Node.js C++ Bindings                  │  <── Main Thread
+├────────────────────────────────────────────────────────┤
+│                         libuv                          │
+│   ┌───────────────────────┐   ┌────────────────────┐   │
+│   │      Event Loop       │   │ Worker Thread Pool │   │  <── Multi-Threaded!
+│   │     (Main Thread)     │   │   (4 OS Threads)   │   │
+│   └───────────┬───────────┘   └──────────┬─────────┘   │
+└───────────────┼──────────────────────────┼─────────────┘
+                │                          │
+┌───────────────▼───────────┐   ┌──────────▼─────────────┐
+│  OS Kernel epoll / kqueue │   │  Blocking System Calls │
+│ (Sockets, Pipes, Network) │   │   (Disk I/O, Crypto)   │
+└───────────────────────────┘   └────────────────────────┘
+\`\`\`
+
+### The V8 Call Stack
+The Google V8 engine provides the JavaScript runtime: the heap where objects reside, the garbage collector, and a single **Call Stack**. 
+
+The Call Stack is strictly LIFO (Last In, First Out). It executes one frame at a time. It cannot pause midway through a synchronous \`for\` loop to let another JavaScript function run. In this sense—and **only in this sense**—is Node.js single-threaded.
+
+When your JavaScript executes:
+\`\`\`javascript
+function calculateTax(subtotal) {
+  return subtotal * 0.0825; // Frame 1
+}
+function processInvoice(order) {
+  const tax = calculateTax(order.subtotal); // Frame 2
+  return order.subtotal + tax;
+}
+\`\`\`
+Everything runs synchronously on **OS Thread #1** (the main thread). If a function takes 5 seconds of CPU time, Thread #1 is pinned. Nothing else can happen on that stack until it returns.
+
+---
+
+## Part 2: Meet libuv, the Hidden Engine
+
+Node.js was not born purely out of V8. It was born when Ryan Dahl combined V8 with an event-driven C library created specifically for Node.js: **libuv**.
+
+libuv is responsible for two distinct concurrency mechanisms:
+1. **The Event Loop**: A state machine running on the **main thread** that polls for events and executes their registered callbacks.
+2. **The Worker Thread Pool**: A dedicated pool of **4 background operating system threads** (by default) managed by libuv in C.
+
+> **Crucial Distinction:**  
+> The Event Loop does NOT have its own thread pool. The Event Loop is a \`while\` loop running directly on the main JavaScript thread! The libuv Worker Thread Pool is a separate group of C threads running in the background.
+
+When you invoke a Node.js asynchronous API, Node.js inspects the nature of the work:
+- Is it network socket I/O? Hand it off to the **OS Kernel** via non-blocking epoll/kqueue.
+- Is it synchronous filesystem I/O, heavy crypto, or compression? Hand it off to the **libuv Worker Thread Pool**.
+
+Let's test this directly.
+
+---
+
+## Part 3: The Four-Worker Experiment (Thread Pool Saturation)
+
+To prove that the libuv thread pool exists and has exactly 4 threads by default, we created **Experiment A** (\`experiments/node-concurrency/experiment-a-threadpool.mjs\`).
+
+We use \`crypto.pbkdf2()\`, a CPU-intensive key derivation algorithm executed natively by OpenSSL inside libuv's thread pool:
+
+\`\`\`javascript
+// experiments/node-concurrency/experiment-a-threadpool.mjs
+import crypto from 'node:crypto';
+import { performance } from 'node:perf_hooks';
+
+const jobCount = parseInt(process.argv[2] || '4', 10);
+const start = performance.now();
+
+for (let i = 1; i <= jobCount; i++) {
+  const jobStart = performance.now();
+  crypto.pbkdf2('passphrase', 'salt', 100000, 64, 'sha512', () => {
+    console.log(\`Job #\${i} finished in \${(performance.now() - jobStart).toFixed(1)} ms\`);
+  });
+}
+\`\`\`
+
+### Run 1: Exactly 4 Jobs (Matching Default Pool Size)
+\`\`\`bash
+$ node experiments/node-concurrency/experiment-a-threadpool.mjs 4
+\`\`\`
+
+**Actual Observed Result:**
+\`\`\`
+UV_THREADPOOL_SIZE : 4 (default)
+Total crypto jobs  : 4
+
+  Job # 1 finished in   251.2 ms
+  Job # 2 finished in   257.8 ms
+  Job # 4 finished in   260.6 ms
+  Job # 3 finished in   268.3 ms
+
+All 4 jobs completed in 269.9 ms total.
+\`\`\`
+
+All 4 jobs started at the same instant ($t=0$) and finished together at $\\approx 260\\text{ms}$. Why? Because libuv has 4 worker threads. Each job received its own dedicated thread.
+
+---
+
+### Run 2: Submitting 8 Jobs to the 4-Worker Pool
+What happens when we submit **8 jobs**?
+
+\`\`\`bash
+$ node experiments/node-concurrency/experiment-a-threadpool.mjs 8
+\`\`\`
+
+**Actual Observed Result:**
+\`\`\`
+UV_THREADPOOL_SIZE : 4 (default)
+Total crypto jobs  : 8
+
+  Job # 4 finished in   241.2 ms  <── Wave 1 (Threads 1-4)
+  Job # 1 finished in   243.1 ms
+  Job # 3 finished in   245.9 ms
+  Job # 2 finished in   259.9 ms
+  ---------------------------------
+  Job # 6 finished in   533.0 ms  <── Wave 2 (Queued until Wave 1 freed threads!)
+  Job # 5 finished in   543.2 ms
+  Job # 7 finished in   556.3 ms
+  Job # 8 finished in   560.9 ms
+
+All 8 jobs completed in 563.6 ms total.
+\`\`\`
+
+Notice the clean breakpoint. 
+- Jobs #1, #2, #3, and #4 finished in **~245ms**.
+- Jobs #5, #6, #7, and #8 were queued in libuv's internal FIFO work queue. They could not start until Wave 1 completed. Their duration doubled to **~550ms**.
+
+Total wall-clock duration: **563.6ms** ($2 \\times 260\\text{ms}$).
+
+---
+
+### Run 3: Expanding UV_THREADPOOL_SIZE to 8
+Can we eliminate the queue delay by increasing the thread pool size?
+
+\`\`\`bash
+$ UV_THREADPOOL_SIZE=8 node experiments/node-concurrency/experiment-a-threadpool.mjs 8
+\`\`\`
+
+**Actual Observed Result:**
+\`\`\`
+UV_THREADPOOL_SIZE : 8
+Total crypto jobs  : 8
+
+  Job # 2 finished in   442.1 ms
+  Job # 1 finished in   443.8 ms
+  Job # 3 finished in   443.9 ms
+  Job # 4 finished in   449.5 ms
+  Job # 5 finished in   450.6 ms
+  Job # 6 finished in   454.8 ms
+  Job # 7 finished in   567.7 ms
+  Job # 8 finished in   575.1 ms
+
+All 8 jobs completed in 577.5 ms total.
+\`\`\`
+
+Look closely at the numbers.
+With 8 threads, **all 8 jobs ran concurrently from t=0.** None sat idle in a queue.
+However, because the host hardware has finite CPU cores, the operating system kernel had to time-slice CPU cycles across all 8 threads. Consequently, individual job duration rose from 250ms to ~450ms.
+
+> **Engineering Takeaway:**  
+> \`UV_THREADPOOL_SIZE\` is an environment variable evaluated **only once when the Node.js process starts**. Setting \`process.env.UV_THREADPOOL_SIZE = 8\` inside your JavaScript file does nothing—libuv has already initialized its thread pool before your script evaluates.
+
+---
+
+## Part 4: The Surprising Network Case (epoll vs. Thread Pools)
+
+At this point, many engineers jump to a dangerous conclusion:
+*"If libuv only has 4 threads, does that mean my Node.js server can only handle 4 concurrent database queries or 4 concurrent HTTP requests?"*
+
+**The answer is an emphatic NO.**
+
+Network operations—TCP sockets, HTTP connections, WebSockets, and outgoing database client connections—**DO NOT use libuv worker threads.**
+
+### How Asynchronous Network I/O Actually Works
+When Node.js listens on port 3000 or initiates a TCP connection to PostgreSQL, it asks the Linux kernel to create a file descriptor and mark it as **non-blocking** (\`O_NONBLOCK\`):
+
+\`\`\`
+┌────────────────┐      1. Add socket fd to watch list      ┌─────────────────────────┐
+│ Node.js Main   │ ───────────────────────────────────────> │ Linux Kernel epoll_ctl  │
+│  Event Loop    │                                          └────────────┬────────────┘
+│                │      2. epoll_wait(timeout)                           │
+│                │ <───────────────────────────────────────── (Poll Phase)
+│                │                                                       ▼
+│                │      3. "Data arrived on socket #42!"    ┌─────────────────────────┐
+│                │ <─────────────────────────────────────── │ Incoming TCP SYN / DATA │
+└────────────────┘                                          └─────────────────────────┘
+\`\`\`
+
+1. When data is sent over a socket, Node.js does not spin a thread waiting for bytes.
+2. It registers the socket with the OS kernel's event demultiplexer:
+   - **Linux:** \`epoll\`
+   - **macOS / BSD:** \`kqueue\`
+   - **Windows:** \`IOCP\`
+3. During the **Poll phase** of the Event Loop, libuv executes a single system call: \`epoll_wait()\`.
+4. The kernel informs libuv: *"Socket #42 and Socket #108 have received packets."*
+5. libuv reads the packets into user-space buffers and invokes your JavaScript \`'data'\` callbacks on the main thread.
+
+Because one kernel \`epoll\` instance can monitor hundreds of thousands of idle connections without allocating OS threads, a single Node.js process can easily maintain **100,000 concurrent idle WebSockets** while consuming minimal memory.
+
+### The Special DNS Trap: dns.lookup vs. dns.resolve
+Here is a classic production gotcha:
+
+| Method | Mechanism | Uses libuv Thread Pool? | Respects /etc/hosts? |
+| :--- | :--- | :--- | :--- |
+| **\`dns.lookup()\`** | Calls C library \`getaddrinfo(3)\` | **YES (Consumes 1 worker thread!)** | Yes |
+| **\`dns.resolve()\`** | Uses c-ares C library | **NO (Pure non-blocking network socket)** | No (Queries DNS directly) |
+
+When you use Node.js's default \`http.request('https://api.stripe.com')\`, Node.js calls \`dns.lookup()\` to resolve the hostname. 
+
+If your service experiences a DNS latency spike while initiating 100 outgoing API calls, **all 4 libuv worker threads become stuck inside blocking \`getaddrinfo()\` calls**. Suddenly, unrelated \`fs.readFile()\` or \`crypto\` calls freeze across your entire application!
+
+---
+
+## Part 5: Promise.all() Is Not a Parallel Execution Engine
+
+Engineers frequently wrap tasks in \`Promise.all()\` believing they have achieved multi-threaded parallelism:
+
+\`\`\`javascript
+await Promise.all([
+  computeReport(data1),
+  computeReport(data2),
+  computeReport(data3)
+]);
+\`\`\`
+
+We designed **Experiment C** (\`experiments/node-concurrency/experiment-c-promise-all.mjs\`) to measure what \`Promise.all()\` actually does.
+
+### Comparing Network I/O vs. CPU Tasks
+In Part 1 of Experiment C, we opened **10 concurrent socket connections** with a 50ms delay:
+\`\`\`
+10 socket operations (each taking 50ms) completed in: 79.9 ms total.
+Result: Overlapped in OS kernel readiness queue (libuv event demultiplexer).
+\`\`\`
+
+In Part 2, we wrapped **4 CPU-intensive tasks** (each requiring 60ms of synchronous calculation) in \`Promise.all()\`:
+\`\`\`
+Part 2: 4 CPU-Intensive Tasks Wrapped in Promise.all()
+   Job #1 finished execution after 60.0 ms
+   Job #2 finished execution after 60.0 ms
+   Job #3 finished execution after 60.0 ms
+   Job #4 finished execution after 60.0 ms
+
+   Total duration for 4 x 60ms CPU jobs: 241.1 ms
+   Theoretical parallel time: ~60 ms
+   Actual sequential time   : 240 ms (~241.1 ms)
+\`\`\`
+
+**The finding is unambiguous:**
+\`Promise.all()\` does not spawn threads. It does not distribute work across CPU cores. It is simply a synchronization coordinator for promises. 
+
+If the underlying task is non-blocking I/O (handled by the kernel or libuv threads), the operations overlap. If the task is JavaScript CPU computation, **each callback executes strictly sequentially on the single main thread.**
+
+---
+
+## Part 6: What Happens When the Main Thread Is Blocked?
+
+What happens when an engineer puts CPU-heavy synchronous logic in a Node.js route handler?
+
+In **Experiment B** (\`experiments/node-concurrency/experiment-b-eventloop-blocking.mjs\`), we built an HTTP server with two routes:
+- \`GET /ping\`: Lightweight health check returning immediate JSON.
+- \`GET /heavy\`: Synchronous mathematical loop simulating an un-indexed array filter or heavy JSON parsing.
+
+We used \`perf_hooks.monitorEventLoopDelay()\` to track Event Loop lag.
+
+### The Measured Result
+\`\`\`bash
+$ node experiments/node-concurrency/experiment-b-eventloop-blocking.mjs
+\`\`\`
+
+\`\`\`
+1. Measuring baseline /ping latency (unloaded Event Loop)...
+   Baseline /ping response time: 18.71 ms
+
+2. Firing concurrent requests:
+   - Request 1: /heavy (synchronous CPU loop)
+   - Request 2: /ping  (sent 5ms after /heavy started)
+
+   /heavy finished in : 579.77 ms
+   /ping  finished in : 578.00 ms (BLOCKED waiting for Event Loop!)
+
+Event Loop Histogram Metrics:
+   Max Event Loop Delay : 578.29 ms
+   Mean Event Loop Delay: 578.03 ms
+\`\`\`
+
+While \`/heavy\` ran its synchronous loop on Thread #1, **the Event Loop could not tick**. 
+
+The operating system kernel accepted the incoming TCP connection for \`/ping\`, but Node.js could not read the bytes or dispatch the route handler until the heavy calculation finished. 
+
+A single user requesting an expensive calculation caused every other customer's lightweight request to stall for over half a second.
+
+---
+
+## Part 7: When Should We Use Worker Threads?
+
+If libuv's thread pool is reserved for internal C++ bindings and \`Promise.all()\` doesn't parallelize JavaScript, how do we run CPU-intensive JavaScript in parallel?
+
+The answer is **Worker Threads** (\`node:worker_threads\`), introduced in Node.js v10.5.
+
+In **Experiment D** (\`experiments/node-concurrency/experiment-d-worker-threads.mjs\`), we offloaded four heavy CPU tasks to independent worker threads while running a 10ms heartbeat probe on the main thread:
+
+\`\`\`bash
+$ node experiments/node-concurrency/experiment-d-worker-threads.mjs
+\`\`\`
+
+**Actual Observed Result:**
+\`\`\`
+Dispatching 4 heavy CPU jobs to 4 independent Worker Threads...
+  Worker #1 finished in 1007.7 ms
+  Worker #2 finished in 1012.4 ms
+  Worker #3 finished in  983.6 ms
+  Worker #4 finished in  914.8 ms
+
+All 4 workers finished in 1273.3 ms total.
+Main thread Event Loop health:
+  - Heartbeat ticks executed : 94
+  - Max heartbeat lag         : 0.055 ms
+\`\`\`
+
+### The Miracle of True Parallelism
+While four separate CPU cores were maxed out calculating numbers for 1,000ms:
+- The main thread executed **94 heartbeat ticks**.
+- The maximum event loop lag was **0.055 milliseconds**!
+
+If an HTTP server had received 1,000 health check pings during that second, every single one would have resolved instantly in under 1 millisecond.
+
+### Thread Pool vs. Worker Threads
+| Dimension | libuv Thread Pool | \`node:worker_threads\` |
+| :--- | :--- | :--- |
+| **Controlled By** | libuv internal C++ engine | Application developer |
+| **Runs What?** | Native C++ tasks (fs, crypto, zlib, DNS) | Arbitrary JavaScript / TypeScript |
+| **V8 Engine** | Shares the single V8 Isolate | Each worker has its own independent V8 Isolate |
+| **Memory Isolation** | Shared process heap | Isolated heaps (communicate via postMessage or SharedArrayBuffer) |
+| **Startup Cost** | Pre-allocated at boot | ~30ms–50ms to spawn a new V8 Isolate |
+
+> **Production Warning:**  
+> Never spawn a new \`Worker\` on every incoming HTTP request. Spawning a V8 Isolate costs tens of milliseconds and allocates ~30MB of memory. In production, always use a **pre-warmed worker pool** like \`piscina\`.
+
+---
+
+## Part 8: The Production Decision Guide
+
+Use this flowchart to decide how to handle operations in production Node.js services:
+
+\`\`\`
+What type of work are you executing?
+ │
+ ├── 1. Network I/O (HTTP requests, WebSockets, DB queries, Redis)
+ │    └── Standard async/await. 
+ │        Uses OS non-blocking epoll/kqueue. Zero worker threads needed.
+ │
+ ├── 2. File / Disk I/O, Compression (zlib), or Cryptography (pbkdf2)
+ │    └── Standard asynchronous Node.js APIs (e.g. fs.promises).
+ │        Uses libuv Thread Pool. 
+ │        If disk I/O or crypto is heavily saturated, increase UV_THREADPOOL_SIZE.
+ │
+ ├── 3. Heavy CPU JavaScript (PDF generation, image resizing, large JSON parsing)
+ │    └── DO NOT run on the main thread!
+ │        Use a pre-warmed Worker Thread Pool (e.g. piscina).
+ │        Keeps Event Loop lag < 1ms.
+ │
+ └── 4. Frequent External Hostname Lookups
+      └── Avoid dns.lookup() in tight loops.
+          Use dns.resolve() or enable an in-memory DNS caching agent (like undici / got cache).
+\`\`\`
+
+---
+
+## Conclusion: The Corrected Mental Model
+
+We can now replace the incomplete adage with an accurate mental model:
+
+> **The Corrected Mental Model of Node.js:**  
+> Node.js is single-threaded at the default JavaScript execution level, but multi-threaded at the runtime and process level.  
+> - **Your JavaScript:** Runs on Thread #1 (the Main Thread).  
+> - **Your Network I/O:** Runs on Zero Threads (managed non-blockingly by the OS kernel).  
+> - **Your Disk & Crypto I/O:** Runs on 4+ Native Threads (libuv Worker Pool).  
+> - **Your CPU Parallelism:** Runs on Dedicated Threads (Worker Threads).
+
+Understanding who is doing the work is the difference between an engineer who wonders why their API latency is spiking to 500ms under load, and an engineer who knows exactly which knob to turn.
+    `
   }
 ];
 

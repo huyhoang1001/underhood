@@ -31,10 +31,24 @@ describe('Underhood Data Integrity', () => {
       expect(exp.keyFindings.length).toBeGreaterThan(1);
       expect(exp.limitations.length).toBeGreaterThan(0);
       expect(exp.githubRepo).toMatch(/^https:\/\/github\.com/);
-      expect(['queue-backpressure', 'grpc-multiplex', 'cache-invalidation']).toContain(
-        exp.interactiveType
-      );
+      expect([
+        'queue-backpressure',
+        'grpc-multiplex',
+        'cache-invalidation',
+        'node-threadpool'
+      ]).toContain(exp.interactiveType);
     });
+  });
+
+  it('registers the Node.js concurrency article as a local review draft', () => {
+    const nodeArticle = ARTICLES.find(
+      (a) => a.slug === 'node-js-is-single-threaded-who-is-doing-the-work'
+    );
+    expect(nodeArticle).toBeDefined();
+    expect(nodeArticle?.draft).toBe(true);
+    expect(nodeArticle?.topic).toBe('backend-engineering');
+    expect(nodeArticle?.toc.length).toBe(10);
+    expect(nodeArticle?.readingTime).toMatch(/\d+ min read/);
   });
 
   it('author profile has required principles and links', () => {

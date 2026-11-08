@@ -1,6 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-import { ArrowLeft, Github, BookOpen, Sliders, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, BookOpen, Sliders, CheckCircle2, AlertCircle } from '@lucide/astro';
+import { Github } from 'lucide-react';
 import { ExperimentVisualizer } from '../components/ExperimentVisualizer';
 
 interface Props {
@@ -37,21 +38,21 @@ const {
 ---
 
 <BaseLayout title={`${title} — Underhood Experiments`} description={tagline}>
-  <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
     <a
       href="/experiments"
-      className="inline-flex items-center gap-1.5 text-xs font-medium text-[#78716c] dark:text-[#8b949e] hover:text-[#1c1917] dark:hover:text-[#f0f6fc] transition-colors"
+      class="inline-flex items-center gap-1.5 text-xs font-medium text-[#78716c] dark:text-[#8b949e] hover:text-[#1c1917] dark:hover:text-[#f0f6fc] transition-colors"
     >
-      <ArrowLeft className="w-3.5 h-3.5" />
+      <ArrowLeft class="w-3.5 h-3.5" />
       <span>All laboratory experiments</span>
     </a>
 
     <!-- Experiment Header -->
-    <header className="space-y-4 max-w-3xl pb-8 border-b border-[#e7e3da] dark:border-[#30363d]">
-      <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-[#78716c] dark:text-[#8b949e]">
+    <header class="space-y-4 max-w-3xl pb-8 border-b border-[#e7e3da] dark:border-[#30363d]">
+      <div class="flex flex-wrap items-center gap-2 text-xs font-mono text-[#78716c] dark:text-[#8b949e]">
         <a
           href={`/topics/${topic}`}
-          className="font-semibold text-sky-600 dark:text-sky-400 uppercase tracking-wider text-[11px] hover:underline"
+          class="font-semibold text-sky-600 dark:text-sky-400 uppercase tracking-wider text-[11px] hover:underline"
         >
           {topic.replace(/-/g, ' ')}
         </a>
@@ -60,38 +61,38 @@ const {
         {status === 'draft' && (
           <>
             <span>·</span>
-            <span className="font-mono text-amber-700 dark:text-amber-400 font-semibold text-[11px] uppercase tracking-wider">
+            <span class="font-mono text-amber-700 dark:text-amber-400 font-semibold text-[11px] uppercase tracking-wider">
               [Local Review Draft]
             </span>
           </>
         )}
       </div>
 
-      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc] leading-tight">
+      <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc] leading-tight">
         {title}
       </h1>
 
-      <p className="text-base text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+      <p class="text-base text-[#78716c] dark:text-[#8b949e] leading-relaxed">
         {tagline}
       </p>
 
-      <div className="flex flex-wrap items-center gap-4 pt-2">
+      <div class="flex flex-wrap items-center gap-4 pt-2">
         <a
           href={githubRepo}
           target="_blank"
           rel="noreferrer"
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#1c1917] dark:text-[#f0f6fc] bg-[#f2ede4] dark:bg-[#161b22] border border-[#e7e3da] dark:border-[#30363d] rounded-md hover:border-slate-400 dark:hover:border-slate-600 transition-colors"
+          class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#1c1917] dark:text-[#f0f6fc] bg-[#f2ede4] dark:bg-[#161b22] border border-[#e7e3da] dark:border-[#30363d] rounded-md hover:border-slate-400 dark:hover:border-slate-600 transition-colors"
         >
-          <Github className="w-4 h-4" />
+          <Github class="w-4 h-4" />
           <span>Reproducible Test Repository</span>
         </a>
 
         {relatedArticleSlug && (
           <a
             href={`/writing/${relatedArticleSlug}`}
-            className="flex items-center gap-1.5 text-xs font-medium text-sky-600 dark:text-sky-400 hover:underline"
+            class="flex items-center gap-1.5 text-xs font-medium text-sky-600 dark:text-sky-400 hover:underline"
           >
-            <BookOpen className="w-3.5 h-3.5" />
+            <BookOpen class="w-3.5 h-3.5" />
             <span>Read companion deep-dive essay</span>
           </a>
         )}
@@ -99,61 +100,60 @@ const {
     </header>
 
     <!-- Hypothesis Callout -->
-    <div className="p-5 rounded-lg border border-sky-200 dark:border-sky-900/60 bg-sky-50/50 dark:bg-sky-950/20 text-xs sm:text-sm leading-relaxed">
-      <div className="text-[11px] font-mono uppercase tracking-wider text-sky-700 dark:text-sky-300 font-semibold mb-1">
+    <div class="p-5 rounded-lg border border-sky-200 dark:border-sky-900/60 bg-sky-50/50 dark:bg-sky-950/20 text-xs sm:text-sm leading-relaxed">
+      <div class="text-[11px] font-mono uppercase tracking-wider text-sky-700 dark:text-sky-300 font-semibold mb-1">
         Experimental Hypothesis
       </div>
-      <p className="text-[#1c1917] dark:text-[#f0f6fc]">{hypothesis}</p>
+      <p class="text-[#1c1917] dark:text-[#f0f6fc]">{hypothesis}</p>
     </div>
 
     <!-- Live Interactive Telemetry Simulator -->
     <div>
-      <div className="flex items-center gap-2 pb-2 text-xs font-mono uppercase tracking-wider text-[#78716c] dark:text-[#8b949e]">
-        <Sliders className="w-3.5 h-3.5 text-sky-500" />
+      <div class="flex items-center gap-2 pb-2 text-xs font-mono uppercase tracking-wider text-[#78716c] dark:text-[#8b949e]">
+        <Sliders class="w-3.5 h-3.5 text-sky-500" />
         <span>Interactive Laboratory Simulation</span>
       </div>
       <ExperimentVisualizer client:visible type={interactiveType} />
     </div>
 
     <!-- MDX Content Body -->
-    <div className="prose dark:prose-invert max-w-none text-xs sm:text-sm text-[#1c1917] dark:text-[#e6edf3]">
+    <div class="prose dark:prose-invert max-w-none text-xs sm:text-sm text-[#1c1917] dark:text-[#e6edf3]">
       <slot />
     </div>
 
     <!-- Methodology & Harness Setup -->
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-      <div className="p-5 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] space-y-3">
-        <h2 className="text-sm font-bold text-[#1c1917] dark:text-[#f0f6fc] uppercase tracking-wider font-mono">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+      <div class="p-5 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] space-y-3">
+        <h2 class="text-sm font-bold text-[#1c1917] dark:text-[#f0f6fc] uppercase tracking-wider font-mono">
           Test Harness Setup
         </h2>
-        <p className="text-xs sm:text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+        <p class="text-xs sm:text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed">
           {setup}
         </p>
       </div>
 
-      <div className="p-5 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] space-y-3">
-        <h2 className="text-sm font-bold text-[#1c1917] dark:text-[#f0f6fc] uppercase tracking-wider font-mono">
+      <div class="p-5 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] space-y-3">
+        <h2 class="text-sm font-bold text-[#1c1917] dark:text-[#f0f6fc] uppercase tracking-wider font-mono">
           Implementation Details
         </h2>
-        <p className="text-xs sm:text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+        <p class="text-xs sm:text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed">
           {implementation}
         </p>
       </div>
     </div>
 
     <!-- Key Findings -->
-    <div className="space-y-4 pt-4">
-      <h2 className="text-base font-bold text-[#1c1917] dark:text-[#f0f6fc] uppercase tracking-wider font-mono text-xs">
+    <div class="space-y-4 pt-4">
+      <h2 class="text-base font-bold text-[#1c1917] dark:text-[#f0f6fc] uppercase tracking-wider font-mono text-xs">
         Key Empirical Findings
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {keyFindings.map((finding, idx) => (
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {keyFindings.map((finding) => (
           <div
-            key={idx}
-            className="p-4 rounded-lg border border-[#e7e3da] dark:border-[#30363d] bg-[#fdfdfc] dark:bg-[#161b22] flex items-start gap-3"
+            class="p-4 rounded-lg border border-[#e7e3da] dark:border-[#30363d] bg-[#fdfdfc] dark:bg-[#161b22] flex items-start gap-3"
           >
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-            <span className="text-xs sm:text-sm text-[#44403c] dark:text-[#c9d1d9] leading-relaxed">
+            <CheckCircle2 class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+            <span class="text-xs sm:text-sm text-[#44403c] dark:text-[#c9d1d9] leading-relaxed">
               {finding}
             </span>
           </div>
@@ -163,14 +163,14 @@ const {
 
     <!-- Limitations -->
     {limitations.length > 0 && (
-      <div className="space-y-3 pt-4">
-        <h2 className="text-base font-bold text-[#1c1917] dark:text-[#f0f6fc] uppercase tracking-wider font-mono text-xs">
+      <div class="space-y-3 pt-4">
+        <h2 class="text-base font-bold text-[#1c1917] dark:text-[#f0f6fc] uppercase tracking-wider font-mono text-xs">
           Measurement Invariants & Limitations
         </h2>
-        <ul className="space-y-2 text-xs sm:text-sm text-[#78716c] dark:text-[#8b949e]">
-          {limitations.map((limit, idx) => (
-            <li key={idx} className="flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+        <ul class="space-y-2 text-xs sm:text-sm text-[#78716c] dark:text-[#8b949e]">
+          {limitations.map((limit) => (
+            <li class="flex items-start gap-2">
+              <AlertCircle class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
               <span>{limit}</span>
             </li>
           ))}

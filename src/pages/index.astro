@@ -4,7 +4,7 @@ import { getCollection } from 'astro:content';
 import { calculateReadingTime } from '../utils/readingTime';
 import { TOPIC_LIST } from '../data/topics';
 import { AUTHOR } from '../data/author';
-import { BookOpen, FlaskConical, Rss, ArrowRight } from 'lucide-react';
+import { BookOpen, FlaskConical, Rss, ArrowRight } from '@lucide/astro';
 
 const articles = await getCollection('articles', ({ data }) => {
   return import.meta.env.DEV || data.status !== 'draft';
@@ -20,43 +20,43 @@ const featuredExperiment = experiments[0];
 ---
 
 <BaseLayout>
-  <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-16 sm:space-y-24 py-8 sm:py-12">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 space-y-16 sm:space-y-24 py-8 sm:py-12">
     <!-- 1. Hero Section -->
-    <section className="space-y-6 max-w-4xl">
-      <div className="inline-flex items-center gap-2 text-xs font-mono text-sky-600 dark:text-sky-400">
+    <section class="space-y-6 max-w-4xl">
+      <div class="inline-flex items-center gap-2 text-xs font-mono text-sky-600 dark:text-sky-400">
         <span>UNDERHOOD ENGINEERING PUBLICATION</span>
         <span>·</span>
         <span>VOL. 2026</span>
       </div>
 
-      <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc] leading-[1.15]">
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc] leading-[1.15]">
         Engineering beyond the surface.
       </h1>
 
-      <p className="text-base sm:text-lg text-[#78716c] dark:text-[#8b949e] leading-relaxed max-w-2xl">
+      <p class="text-base sm:text-lg text-[#78716c] dark:text-[#8b949e] leading-relaxed max-w-2xl">
         Deep investigations into distributed systems, runtime internals, tail latency, and what happens when software meets sudden pressure.
       </p>
 
-      <div className="flex flex-wrap items-center gap-4 pt-2">
+      <div class="flex flex-wrap items-center gap-4 pt-2">
         <a
           href="/writing"
-          className="flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-sky-600 hover:bg-sky-500 rounded-md transition-colors shadow-xs"
+          class="flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-sky-600 hover:bg-sky-500 rounded-md transition-colors shadow-xs"
         >
-          <BookOpen className="w-4 h-4" />
+          <BookOpen class="w-4 h-4" />
           <span>Explore Writing</span>
         </a>
         <a
           href="/experiments"
-          className="flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-[#1c1917] dark:text-[#f0f6fc] bg-[#f2ede4] dark:bg-[#161b22] border border-[#e7e3da] dark:border-[#30363d] hover:border-slate-400 dark:hover:border-slate-600 rounded-md transition-colors"
+          class="flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-[#1c1917] dark:text-[#f0f6fc] bg-[#f2ede4] dark:bg-[#161b22] border border-[#e7e3da] dark:border-[#30363d] hover:border-slate-400 dark:hover:border-slate-600 rounded-md transition-colors"
         >
-          <FlaskConical className="w-4 h-4 text-sky-500" />
+          <FlaskConical class="w-4 h-4 text-sky-500" />
           <span>Engineering Lab</span>
         </a>
         <a
           href="/rss.xml"
-          className="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-[#78716c] dark:text-[#8b949e] hover:text-[#1c1917] dark:hover:text-[#f0f6fc] transition-colors"
+          class="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-[#78716c] dark:text-[#8b949e] hover:text-[#1c1917] dark:hover:text-[#f0f6fc] transition-colors"
         >
-          <Rss className="w-4 h-4 text-amber-500" />
+          <Rss class="w-4 h-4 text-amber-500" />
           <span>RSS Feed</span>
         </a>
       </div>
@@ -64,24 +64,24 @@ const featuredExperiment = experiments[0];
 
     <!-- 2. Featured Lead Article OR Empty Editorial Notice -->
     {featuredArticle ? (
-      <section className="space-y-4">
-        <div className="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d]">
-          <h2 className="text-xs uppercase tracking-widest font-mono text-[#78716c] dark:text-[#8b949e]">
+      <section class="space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d]">
+          <h2 class="text-xs uppercase tracking-widest font-mono text-[#78716c] dark:text-[#8b949e]">
             Featured Investigation
           </h2>
-          <div className="flex items-center gap-2 text-xs font-mono text-sky-600 dark:text-sky-400">
+          <div class="flex items-center gap-2 text-xs font-mono text-sky-600 dark:text-sky-400">
             {featuredArticle.data.status === 'draft' && (
-              <span className="text-amber-700 dark:text-amber-400 font-semibold">[Local Review Draft]</span>
+              <span class="text-amber-700 dark:text-amber-400 font-semibold">[Local Review Draft]</span>
             )}
             <span>Deep Dive</span>
           </div>
         </div>
 
-        <article className="group p-6 sm:p-8 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] hover:border-sky-500/50 dark:hover:border-sky-500/50 transition-all shadow-xs space-y-4">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-[#78716c] dark:text-[#8b949e]">
+        <article class="group p-6 sm:p-8 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] hover:border-sky-500/50 dark:hover:border-sky-500/50 transition-all shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center gap-2 text-xs text-[#78716c] dark:text-[#8b949e]">
             <a
               href={`/topics/${featuredArticle.data.topic}`}
-              className="font-semibold text-sky-600 dark:text-sky-400 uppercase tracking-wider text-[11px] hover:underline"
+              class="font-semibold text-sky-600 dark:text-sky-400 uppercase tracking-wider text-[11px] hover:underline"
             >
               {featuredArticle.data.topic.replace(/-/g, ' ')}
             </a>
@@ -91,85 +91,85 @@ const featuredExperiment = experiments[0];
             <span>{calculateReadingTime(featuredArticle.body || '').formattedReadingTime}</span>
           </div>
 
-          <h3 className="text-2xl sm:text-3xl font-bold text-[#1c1917] dark:text-[#f0f6fc] group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors leading-snug">
+          <h3 class="text-2xl sm:text-3xl font-bold text-[#1c1917] dark:text-[#f0f6fc] group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors leading-snug">
             <a href={`/writing/${featuredArticle.slug}`}>
               {featuredArticle.data.title}
             </a>
           </h3>
 
-          <p className="text-sm sm:text-base text-[#78716c] dark:text-[#8b949e] leading-relaxed max-w-3xl">
+          <p class="text-sm sm:text-base text-[#78716c] dark:text-[#8b949e] leading-relaxed max-w-3xl">
             {featuredArticle.data.description}
           </p>
 
-          <div className="flex items-center justify-between pt-2">
-            <div className="flex items-center gap-2 text-xs text-[#a8a29e] dark:text-[#6e7681]">
+          <div class="flex items-center justify-between pt-2">
+            <div class="flex items-center gap-2 text-xs text-[#a8a29e] dark:text-[#6e7681]">
               {featuredArticle.data.tags.map((tag, idx) => (
                 <span key={tag}>
-                  {idx > 0 && <span className="mr-2">·</span>}
+                  {idx > 0 && <span class="mr-2">·</span>}
                   <span>#{tag}</span>
                 </span>
               ))}
             </div>
             <a
               href={`/writing/${featuredArticle.slug}`}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-600 dark:text-sky-400 group-hover:translate-x-1 transition-transform"
+              class="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-600 dark:text-sky-400 group-hover:translate-x-1 transition-transform"
             >
-              Read Essay <ArrowRight className="w-3.5 h-3.5" />
+              Read Essay <ArrowRight class="w-3.5 h-3.5" />
             </a>
           </div>
         </article>
       </section>
     ) : (
-      <section className="p-8 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#fdfdfc] dark:bg-[#161b22] space-y-4">
-        <div className="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d]">
-          <div className="text-xs uppercase tracking-widest font-mono text-sky-600 dark:text-sky-400 font-semibold">
+      <section class="p-8 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#fdfdfc] dark:bg-[#161b22] space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d]">
+          <div class="text-xs uppercase tracking-widest font-mono text-sky-600 dark:text-sky-400 font-semibold">
             Editorial Status
           </div>
-          <span className="text-xs font-mono text-[#78716c] dark:text-[#8b949e]">Peer Verification</span>
+          <span class="text-xs font-mono text-[#78716c] dark:text-[#8b949e]">Peer Verification</span>
         </div>
-        <h3 className="text-xl sm:text-2xl font-bold text-[#1c1917] dark:text-[#f0f6fc]">
+        <h3 class="text-xl sm:text-2xl font-bold text-[#1c1917] dark:text-[#f0f6fc]">
           Upcoming Publications in Peer Review
         </h3>
-        <p className="text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed max-w-3xl">
+        <p class="text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed max-w-3xl">
           Underhood&apos;s initial series of empirical investigations into runtime concurrency, event loop mechanics, and distributed systems resilience are currently undergoing reproducibility checks across independent Linux environments.
         </p>
       </section>
     )}
 
     <!-- 3. Latest Writing & Engineering Laboratory Spotlight -->
-    <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
       <!-- Left column: Recent Articles -->
-      <div className="lg:col-span-7 space-y-6">
-        <div className="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d]">
-          <h2 className="text-xs uppercase tracking-widest font-mono text-[#78716c] dark:text-[#8b949e]">
+      <div class="lg:col-span-7 space-y-6">
+        <div class="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d]">
+          <h2 class="text-xs uppercase tracking-widest font-mono text-[#78716c] dark:text-[#8b949e]">
             Latest Writing
           </h2>
-          <a href="/writing" className="text-xs text-sky-600 dark:text-sky-400 hover:underline">
+          <a href="/writing" class="text-xs text-sky-600 dark:text-sky-400 hover:underline">
             View all ({articles.length})
           </a>
         </div>
 
         {recentArticles.length === 0 ? (
-          <div className="p-6 rounded-lg border border-dashed border-[#e7e3da] dark:border-[#30363d] text-center text-xs text-[#78716c] dark:text-[#8b949e]">
+          <div class="p-6 rounded-lg border border-dashed border-[#e7e3da] dark:border-[#30363d] text-center text-xs text-[#78716c] dark:text-[#8b949e]">
             {articles.length === 0
               ? 'No essays currently published in production.'
               : 'All current essays are shown in the featured section above.'}
           </div>
         ) : (
-          <div className="divide-y divide-[#e7e3da] dark:divide-[#30363d]">
+          <div class="divide-y divide-[#e7e3da] dark:divide-[#30363d]">
             {recentArticles.map((art) => (
-              <article key={art.slug} className="group py-5 first:pt-0 space-y-2">
-                <div className="flex items-center gap-2 text-xs text-[#78716c] dark:text-[#8b949e]">
-                  <span className="capitalize">{art.data.topic.replace(/-/g, ' ')}</span>
+              <article key={art.slug} class="group py-5 first:pt-0 space-y-2">
+                <div class="flex items-center gap-2 text-xs text-[#78716c] dark:text-[#8b949e]">
+                  <span class="capitalize">{art.data.topic.replace(/-/g, ' ')}</span>
                   <span>·</span>
                   <span>{art.data.date}</span>
                   <span>·</span>
                   <span>{calculateReadingTime(art.body || '').formattedReadingTime}</span>
                 </div>
-                <h3 className="text-lg font-bold text-[#1c1917] dark:text-[#f0f6fc] group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                <h3 class="text-lg font-bold text-[#1c1917] dark:text-[#f0f6fc] group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
                   <a href={`/writing/${art.slug}`}>{art.data.title}</a>
                 </h3>
-                <p className="text-xs sm:text-sm text-[#78716c] dark:text-[#8b949e] line-clamp-2 leading-relaxed">
+                <p class="text-xs sm:text-sm text-[#78716c] dark:text-[#8b949e] line-clamp-2 leading-relaxed">
                   {art.data.description}
                 </p>
               </article>
@@ -179,49 +179,49 @@ const featuredExperiment = experiments[0];
       </div>
 
       <!-- Right column: Engineering Lab Showcase -->
-      <div className="lg:col-span-5 space-y-6">
-        <div className="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d]">
-          <h2 className="text-xs uppercase tracking-widest font-mono text-[#78716c] dark:text-[#8b949e]">
+      <div class="lg:col-span-5 space-y-6">
+        <div class="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d]">
+          <h2 class="text-xs uppercase tracking-widest font-mono text-[#78716c] dark:text-[#8b949e]">
             Engineering Lab
           </h2>
-          <a href="/experiments" className="text-xs text-sky-600 dark:text-sky-400 hover:underline">
+          <a href="/experiments" class="text-xs text-sky-600 dark:text-sky-400 hover:underline">
             All Labs ({experiments.length})
           </a>
         </div>
 
         {featuredExperiment ? (
-          <div className="p-5 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#fdfdfc] dark:bg-[#161b22] hover:border-sky-500/50 transition-colors space-y-3">
-            <div className="flex items-center gap-2 text-xs font-mono text-sky-600 dark:text-sky-400">
-              <FlaskConical className="w-3.5 h-3.5" />
+          <div class="p-5 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#fdfdfc] dark:bg-[#161b22] hover:border-sky-500/50 transition-colors space-y-3">
+            <div class="flex items-center gap-2 text-xs font-mono text-sky-600 dark:text-sky-400">
+              <FlaskConical class="w-3.5 h-3.5" />
               <span>Reproducible Investigation</span>
             </div>
 
-            <h3 className="text-base font-bold text-[#1c1917] dark:text-[#f0f6fc]">
+            <h3 class="text-base font-bold text-[#1c1917] dark:text-[#f0f6fc]">
               <a href={`/experiments/${featuredExperiment.slug}`}>{featuredExperiment.data.title}</a>
             </h3>
 
-            <p className="text-xs text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+            <p class="text-xs text-[#78716c] dark:text-[#8b949e] leading-relaxed">
               {featuredExperiment.data.tagline}
             </p>
 
-            <div className="p-3 rounded-lg bg-[#f7f4ee] dark:bg-[#0d1117] border border-[#e7e3da] dark:border-[#30363d] text-xs font-mono space-y-1">
-              <div className="text-[11px] text-[#78716c] dark:text-[#8b949e]">
+            <div class="p-3 rounded-lg bg-[#f7f4ee] dark:bg-[#0d1117] border border-[#e7e3da] dark:border-[#30363d] text-xs font-mono space-y-1">
+              <div class="text-[11px] text-[#78716c] dark:text-[#8b949e]">
                 Key Hypothesis:
               </div>
-              <p className="text-[#1c1917] dark:text-[#f0f6fc] text-xs line-clamp-2">
+              <p class="text-[#1c1917] dark:text-[#f0f6fc] text-xs line-clamp-2">
                 {featuredExperiment.data.hypothesis}
               </p>
             </div>
 
             <a
               href={`/experiments/${featuredExperiment.slug}`}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-600 dark:text-sky-400 pt-1 hover:underline"
+              class="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-600 dark:text-sky-400 pt-1 hover:underline"
             >
-              Launch Interactive Simulation <ArrowRight className="w-3.5 h-3.5" />
+              Launch Interactive Simulation <ArrowRight class="w-3.5 h-3.5" />
             </a>
           </div>
         ) : (
-          <div className="p-5 rounded-xl border border-dashed border-[#e7e3da] dark:border-[#30363d] text-center text-xs text-[#78716c] dark:text-[#8b949e]">
+          <div class="p-5 rounded-xl border border-dashed border-[#e7e3da] dark:border-[#30363d] text-center text-xs text-[#78716c] dark:text-[#8b949e]">
             No active lab simulations published.
           </div>
         )}
@@ -229,34 +229,34 @@ const featuredExperiment = experiments[0];
     </section>
 
     <!-- 4. Topic Gateway Tracks -->
-    <section className="space-y-6">
-      <div className="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d]">
-        <h2 className="text-xs uppercase tracking-widest font-mono text-[#78716c] dark:text-[#8b949e]">
+    <section class="space-y-6">
+      <div class="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d]">
+        <h2 class="text-xs uppercase tracking-widest font-mono text-[#78716c] dark:text-[#8b949e]">
           Topic Exploration
         </h2>
-        <a href="/topics" className="text-xs text-sky-600 dark:text-sky-400 hover:underline">
+        <a href="/topics" class="text-xs text-sky-600 dark:text-sky-400 hover:underline">
           Explore taxonomy
         </a>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {TOPIC_LIST.slice(0, 6).map((topic) => {
           const count = articles.filter((a) => a.data.topic === topic.id).length;
           return (
             <a
               key={topic.id}
               href={`/topics/${topic.id}`}
-              className="p-5 rounded-lg border border-[#e7e3da] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] hover:border-slate-400 dark:hover:border-slate-600 transition-colors space-y-2 block"
+              class="p-5 rounded-lg border border-[#e7e3da] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] hover:border-slate-400 dark:hover:border-slate-600 transition-colors space-y-2 block"
             >
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-sm text-[#1c1917] dark:text-[#f0f6fc]">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold text-sm text-[#1c1917] dark:text-[#f0f6fc]">
                   {topic.name}
                 </span>
-                <span className="font-mono text-[#a8a29e] dark:text-[#6e7681]">
+                <span class="font-mono text-[#a8a29e] dark:text-[#6e7681]">
                   {count} {count === 1 ? 'article' : 'articles'}
                 </span>
               </div>
-              <p className="text-xs text-[#78716c] dark:text-[#8b949e] line-clamp-2 leading-relaxed">
+              <p class="text-xs text-[#78716c] dark:text-[#8b949e] line-clamp-2 leading-relaxed">
                 {topic.tagline}
               </p>
             </a>
@@ -266,22 +266,22 @@ const featuredExperiment = experiments[0];
     </section>
 
     <!-- 5. Author Statement & Editorial Philosophy -->
-    <section className="p-6 sm:p-8 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#f7f4ee]/70 dark:bg-[#161b22]/70 space-y-4">
-      <div className="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d]">
-        <div className="text-xs uppercase tracking-widest font-mono text-[#78716c] dark:text-[#8b949e]">
+    <section class="p-6 sm:p-8 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#f7f4ee]/70 dark:bg-[#161b22]/70 space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d]">
+        <div class="text-xs uppercase tracking-widest font-mono text-[#78716c] dark:text-[#8b949e]">
           Editorial Tenet
         </div>
-        <a href="/about" className="text-xs text-sky-600 dark:text-sky-400 hover:underline">
+        <a href="/about" class="text-xs text-sky-600 dark:text-sky-400 hover:underline">
           Author profile →
         </a>
       </div>
 
-      <blockquote className="text-base sm:text-lg font-serif italic text-[#1c1917] dark:text-[#f0f6fc] leading-relaxed max-w-3xl">
+      <blockquote class="text-base sm:text-lg font-serif italic text-[#1c1917] dark:text-[#f0f6fc] leading-relaxed max-w-3xl">
         &ldquo;{AUTHOR.editorialPhilosophy}&rdquo;
       </blockquote>
 
-      <div className="flex items-center gap-3 pt-2 text-xs text-[#78716c] dark:text-[#8b949e]">
-        <span className="font-semibold text-[#1c1917] dark:text-[#f0f6fc]">
+      <div class="flex items-center gap-3 pt-2 text-xs text-[#78716c] dark:text-[#8b949e]">
+        <span class="font-semibold text-[#1c1917] dark:text-[#f0f6fc]">
           {AUTHOR.name}
         </span>
         <span>·</span>

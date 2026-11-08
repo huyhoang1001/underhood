@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { TOPIC_LIST, TOPICS } from '../../data/topics';
 import { calculateReadingTime } from '../../utils/readingTime';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from '@lucide/astro';
 
 export async function getStaticPaths() {
   return TOPIC_LIST.map((topic) => ({
@@ -26,63 +26,63 @@ const topicExperiments = allExperiments.filter((e) => e.data.topic === topic.id)
 ---
 
 <BaseLayout title={`${topic.name} — Underhood Domain Directory`} description={topic.description}>
-  <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-10 py-8 sm:py-12">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 space-y-10 py-8 sm:py-12">
     <a
       href="/topics"
-      className="inline-flex items-center gap-1.5 text-xs font-medium text-[#78716c] dark:text-[#8b949e] hover:text-[#1c1917] dark:hover:text-[#f0f6fc] transition-colors"
+      class="inline-flex items-center gap-1.5 text-xs font-medium text-[#78716c] dark:text-[#8b949e] hover:text-[#1c1917] dark:hover:text-[#f0f6fc] transition-colors"
     >
-      <ArrowLeft className="w-3.5 h-3.5" />
+      <ArrowLeft class="w-3.5 h-3.5" />
       <span>All topics directory</span>
     </a>
 
-    <header className="space-y-3 max-w-3xl pb-8 border-b border-[#e7e3da] dark:border-[#30363d]">
-      <div className="text-xs font-mono uppercase tracking-widest text-sky-600 dark:text-sky-400">
+    <header class="space-y-3 max-w-3xl pb-8 border-b border-[#e7e3da] dark:border-[#30363d]">
+      <div class="text-xs font-mono uppercase tracking-widest text-sky-600 dark:text-sky-400">
         Domain Focus
       </div>
-      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc]">
+      <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc]">
         {topic.name}
       </h1>
-      <p className="text-base text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+      <p class="text-base text-[#78716c] dark:text-[#8b949e] leading-relaxed">
         {topic.description}
       </p>
     </header>
 
     <!-- Topic Articles -->
-    <div className="space-y-6">
-      <div className="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d] text-xs font-mono text-[#78716c] dark:text-[#8b949e]">
+    <div class="space-y-6">
+      <div class="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d] text-xs font-mono text-[#78716c] dark:text-[#8b949e]">
         <span>Published Essays ({topicArticles.length})</span>
       </div>
 
       {topicArticles.length === 0 ? (
-        <div className="py-12 text-center text-sm text-[#78716c] dark:text-[#8b949e] max-w-lg mx-auto space-y-2">
+        <div class="py-12 text-center text-sm text-[#78716c] dark:text-[#8b949e] max-w-lg mx-auto space-y-2">
           <p>No articles are currently published in this domain.</p>
-          <p className="text-xs text-[#a8a29e] dark:text-[#6e7681]">
+          <p class="text-xs text-[#a8a29e] dark:text-[#6e7681]">
             Upcoming technical investigations and reproducible benchmarks for {topic.name} are undergoing peer reproduction.
           </p>
         </div>
       ) : (
-        <div className="divide-y divide-[#e7e3da] dark:divide-[#30363d]">
+        <div class="divide-y divide-[#e7e3da] dark:divide-[#30363d]">
           {topicArticles.map((art) => {
             const readingTimeInfo = calculateReadingTime(art.body || '');
             return (
-              <article key={art.slug} className="group py-6 first:pt-0 space-y-2">
-                <div className="flex items-center gap-2 text-xs text-[#78716c] dark:text-[#8b949e]">
+              <article class="group py-6 first:pt-0 space-y-2">
+                <div class="flex items-center gap-2 text-xs text-[#78716c] dark:text-[#8b949e]">
                   <span>{art.data.date}</span>
                   <span>·</span>
                   <span>{readingTimeInfo.formattedReadingTime}</span>
                   {art.data.status === 'draft' && (
                     <>
                       <span>·</span>
-                      <span className="font-mono text-amber-700 dark:text-amber-400 font-semibold text-[11px] uppercase tracking-wider">
+                      <span class="font-mono text-amber-700 dark:text-amber-400 font-semibold text-[11px] uppercase tracking-wider">
                         [Draft]
                       </span>
                     </>
                   )}
                 </div>
-                <h2 className="text-xl font-bold text-[#1c1917] dark:text-[#f0f6fc] group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                <h2 class="text-xl font-bold text-[#1c1917] dark:text-[#f0f6fc] group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
                   <a href={`/writing/${art.slug}`}>{art.data.title}</a>
                 </h2>
-                <p className="text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed line-clamp-2">
+                <p class="text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed line-clamp-2">
                   {art.data.description}
                 </p>
               </article>
@@ -94,25 +94,24 @@ const topicExperiments = allExperiments.filter((e) => e.data.topic === topic.id)
 
     <!-- Associated Experiments -->
     {topicExperiments.length > 0 && (
-      <div className="space-y-4 pt-6">
-        <div className="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d] text-xs font-mono text-[#78716c] dark:text-[#8b949e]">
+      <div class="space-y-4 pt-6">
+        <div class="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d] text-xs font-mono text-[#78716c] dark:text-[#8b949e]">
           <span>Associated Laboratory Experiments</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {topicExperiments.map((exp) => (
             <a
-              key={exp.slug}
               href={`/experiments/${exp.slug}`}
-              className="p-5 rounded-lg border border-[#e7e3da] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] hover:border-sky-500/50 space-y-2 transition-colors block"
+              class="p-5 rounded-lg border border-[#e7e3da] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] hover:border-sky-500/50 space-y-2 transition-colors block"
             >
-              <h3 className="text-sm font-semibold text-[#1c1917] dark:text-[#f0f6fc]">
+              <h3 class="text-sm font-semibold text-[#1c1917] dark:text-[#f0f6fc]">
                 {exp.data.title}
               </h3>
-              <p className="text-xs text-[#78716c] dark:text-[#8b949e] line-clamp-2 leading-relaxed">
+              <p class="text-xs text-[#78716c] dark:text-[#8b949e] line-clamp-2 leading-relaxed">
                 {exp.data.tagline}
               </p>
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-sky-600 dark:text-sky-400 pt-1">
-                Launch simulation <ArrowRight className="w-3 h-3" />
+              <span class="inline-flex items-center gap-1 text-xs font-medium text-sky-600 dark:text-sky-400 pt-1">
+                Launch simulation <ArrowRight class="w-3 h-3" />
               </span>
             </a>
           ))}

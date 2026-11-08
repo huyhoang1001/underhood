@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { TOPIC_LIST } from '../../data/topics';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight } from '@lucide/astro';
 
 const allArticles = await getCollection('articles', ({ data }) => {
   return import.meta.env.DEV || data.status !== 'draft';
@@ -14,32 +14,31 @@ const allExperiments = await getCollection('experiments', ({ data }) => {
 ---
 
 <BaseLayout title="Topics — Underhood Engineering Directory" description="Content organized by core engineering disciplines including distributed systems, backend engineering, performance, and system design.">
-  <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-10 py-8 sm:py-12">
-    <div className="space-y-3 max-w-2xl">
-      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc]">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 space-y-10 py-8 sm:py-12">
+    <div class="space-y-3 max-w-2xl">
+      <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc]">
         Topics
       </h1>
-      <p className="text-sm sm:text-base text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+      <p class="text-sm sm:text-base text-[#78716c] dark:text-[#8b949e] leading-relaxed">
         Content organized by core engineering disciplines. Each domain curates foundational theoretical concepts, practical failure modes, and reproducible benchmarks.
       </p>
     </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       {TOPIC_LIST.map((topic) => {
         const topicArticles = allArticles.filter((a) => a.data.topic === topic.id);
         const topicExperiments = allExperiments.filter((e) => e.data.topic === topic.id);
         return (
           <a
-            key={topic.id}
             href={`/topics/${topic.id}`}
-            className="p-6 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] hover:border-sky-500/50 transition-all space-y-4 shadow-2xs flex flex-col justify-between block"
+            class="p-6 rounded-xl border border-[#e7e3da] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] hover:border-sky-500/50 transition-all space-y-4 shadow-2xs flex flex-col justify-between block"
           >
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-mono text-sky-600 dark:text-sky-400 uppercase tracking-wider text-[11px]">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-mono text-sky-600 dark:text-sky-400 uppercase tracking-wider text-[11px]">
                   Domain
                 </span>
-                <div className="flex items-center gap-2 text-xs font-mono text-[#a8a29e] dark:text-[#6e7681]">
+                <div class="flex items-center gap-2 text-xs font-mono text-[#a8a29e] dark:text-[#6e7681]">
                   <span>{topicArticles.length} {topicArticles.length === 1 ? 'essay' : 'essays'}</span>
                   {topicExperiments.length > 0 && (
                     <>
@@ -50,18 +49,18 @@ const allExperiments = await getCollection('experiments', ({ data }) => {
                 </div>
               </div>
 
-              <h2 className="text-xl font-bold text-[#1c1917] dark:text-[#f0f6fc]">
+              <h2 class="text-xl font-bold text-[#1c1917] dark:text-[#f0f6fc]">
                 {topic.name}
               </h2>
 
-              <p className="text-xs sm:text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+              <p class="text-xs sm:text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed">
                 {topic.description}
               </p>
             </div>
 
-            <div className="pt-3 border-t border-[#e7e3da] dark:border-[#30363d] flex items-center justify-between text-xs text-sky-600 dark:text-sky-400 font-semibold">
+            <div class="pt-3 border-t border-[#e7e3da] dark:border-[#30363d] flex items-center justify-between text-xs text-sky-600 dark:text-sky-400 font-semibold">
               <span>Explore domain archive</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight class="w-3.5 h-3.5" />
             </div>
           </a>
         );

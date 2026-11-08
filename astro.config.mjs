@@ -1,4 +1,4 @@
-import { defineConfig } from 'astro/config';
+import { defineConfig, envField } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
@@ -15,45 +15,45 @@ export default defineConfig({
     mdx(),
     keystatic()
   ],
+  env: {
+    schema: {
+      KEYSTATIC_GITHUB_CLIENT_ID: envField.string({ context: 'server', access: 'secret', optional: true }),
+      KEYSTATIC_GITHUB_CLIENT_SECRET: envField.string({ context: 'server', access: 'secret', optional: true }),
+      KEYSTATIC_SECRET: envField.string({ context: 'server', access: 'secret', optional: true }),
+      PUBLIC_KEYSTATIC_GITHUB_APP_SLUG: envField.string({ context: 'client', access: 'public', optional: true }),
+    }
+  },
   vite: {
     plugins: [
-      tailwindcss(),
-      {
-        name: 'virtual-astro-env-server',
-        resolveId(id) {
-          if (id === 'astro:env/server') {
-            return '\0astro:env/server';
-          }
-        },
-        load(id) {
-          if (id === '\0astro:env/server') {
-            return `export function getSecret(key) { return process.env[key]; }`;
-          }
-        }
-      }
+      tailwindcss()
     ],
-    optimizeDeps: {
-      exclude: ['astro:env/server'],
-      esbuildOptions: {
-        plugins: [
-          {
-            name: 'esbuild-astro-env-server',
-            setup(build) {
-              build.onResolve({ filter: /^astro:env\/server$/ }, () => ({
-                path: 'astro:env/server',
-                external: true
-              }));
-            }
-          }
-        ]
+    resolve: {
+      alias: {
+        'astro:env/server': '/src/env-shim.ts'
       }
     },
     ssr: {
       external: ['astro:env/server']
     },
-    server: {
-      port: 3000,
-      host: '0.0.0.0'
+    optimizeDeps: {
+      exclude: ['astro:env/server'],
+      esbuildOptions: {
+        plugins: [
+          {
+            name: 'esbuild-keystatic-env-fix',
+            setup(build) {
+              build.onResolve({ filter: /^astro:env\/server$/ }, () => ({
+                path: '/app/applet/src/env-shim.ts',
+                external: false
+              }));
+            }
+          }
+        ]
+      }
     }
+  },
+  server: {
+    port: 3000,
+    host: '0.0.0.0'
   }
 });

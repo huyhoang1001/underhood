@@ -1,213 +1,167 @@
-# Underhood — Independent Personal Engineering Publication
+# Architectural Migration Plan — Underhood to Astro + Keystatic
 
-Underhood is an independent, production-grade personal engineering publication for a senior software engineer covering distributed systems, backend engineering, performance, architecture, reproducible experiments, and hard-earned production lessons. The platform prioritizes serious technical long-form reading, interactive architecture diagrams, live experiment telemetry, and lightning-fast instant search.
+Migrate **Underhood** from its existing React + Vite SPA architecture to a static-first **Astro + Keystatic** publication platform. Public pages will be statically generated for maximum performance, security, and SEO, while Keystatic provides a local Git-backed content management experience without a database or third-party CMS backend.
 
-***
+---
 
-## User Review & Critical Decisions
+## User Review & Confirmed Decisions
 
 > [!IMPORTANT]
-> The application is engineered as a high-performance web publication optimized for instant navigation, rich MDX technical authoring, zero-latency full-text search, and reproducible engineering experiments. 
+> The following architectural decisions were confirmed in Phase 1 interactive alignment:
 
-- **Confirmed Architectural Posture**: Client-side single-page architecture built with React 19, TypeScript, Vite, Tailwind CSS v4, Lucide icons, and Motion, with full static-like client routing, zero runtime layout shift, and instant client-side full-text search.
-- **Visual Design Identity**: Deep charcoal dark-mode first (`#0e1117`, `#161b22`) with an authentic warm alabaster/paper light-mode (`#fbf9f5`, `#f2ede4`), restrained electric blue accents (`#38bdf8` / `#0284c7`), clean unboxed metadata with typographic separators (strictly obeying zero-pill discipline), and no fake telemetry slop.
-- **Reading Engine**: Full typography control, automatic table of contents with active IntersectionObserver scroll tracking, reading progress bar, syntax-highlighted code blocks with language/filename tabs and copy button, inline Mermaid-style architecture diagrams, callouts, and footnote tooltips.
-- **Engineering Laboratory (`/experiments`)**: Interactive reproducible technical experiments featuring hypothesis, system topology, test harnesses, live interactive telemetry controls (e.g. queue backpressure simulation, p99 latency curve explorer), and reproducible benchmark manifests.
-- **Search System**: Global Command Palette (`Cmd+K` / `Ctrl+K`) and dedicated query filtering with keyword highlighting, topic facets, keyboard navigation, and instant local indexing.
+- **Keystatic Admin Route**: Confirmed as `/keystatic` for the local content editing dashboard.
+- **Astro Output Strategy**: Confirmed as **Static public pages with hybrid Keystatic admin** (`output: 'hybrid'` / static default with `export const prerender = false` for `/keystatic` admin API endpoints).
+- **Migration Execution**: Confirmed as **Direct in-place migration**, replacing Vite entry points with Astro routing while preserving all MDX content, React interactive components, Tailwind styling, and unit test suites.
 
-***
+---
 
 ## 1. Overview & Core Concept
 
-- **What It Does**: Underhood delivers an editorial publication designed for deep technical reading. It provides five core views:
-  1. **Home (`/`)**: Wordmark header, engineering statement, lead featured investigation, recent essays, topic gateways, active experiment spotlights, and author profile.
-  2. **Writing (`/writing`)**: Filterable, searchable catalog of deep-dive articles with reading times, topic facets, tags, and publication timestamps.
-  3. **Article Detail (`/writing/:slug`)**: High-fidelity long-form reader with dynamic TOC, reading progress, code copy affordances, callout blocks, architecture diagrams, and footnote references.
-  4. **Topics (`/topics` & `/topics/:slug`)**: Curated engineering domains (Distributed Systems, Backend Engineering, Performance, System Design, Cloud & Infrastructure, Engineering Experiments, Lessons Learned) with specialized track overviews.
-  5. **Engineering Lab (`/experiments` & `/experiments/:slug`)**: Structured technical reports on distributed systems experiments (e.g. "Bounded Queues vs. Drop-Tail Under Sudden Bursts", "gRPC HTTP/2 Stream Multiplexing Saturation") with interactive visualizers.
-  6. **About (`/about`)**: Senior engineer background, core architectural principles, open-source projects, and contact channels.
-- **Target Audience / Persona**: Staff and Principal engineers, systems architects, backend developers, and performance engineers who appreciate deep, rigorous technical writing over promotional summaries.
-- **Key Value**: Explores not only *how* software works, but *why* it works, *what breaks*, and *what happens under pressure*.
+- **What It Does**: Transforms Underhood into a Git-native Astro static blog with typed content schemas, server-rendered MDX articles, zero-JS static HTML for prose reading, and hydrated React islands for interactive architecture & threadpool visualizers.
+- **Target Audience**: Senior backend, distributed systems, and performance engineers looking for deep, reproducible technical publications.
+- **Key Value**: Instant static page loads, full SEO search engine indexability, typed frontmatter validation, and a local visual MDX editor (Keystatic) backed entirely by Git.
 
-***
+---
 
 ## 2. User Experience & Visual Design
 
-### Visual Identity & Theme Tokens
-- **Dark Mode (Default)**:
-  - Surface Canvas: Deep charcoal `#0d1117` / `#161b22` (GitHub / Terminal inspired, not harsh pure `#000000`).
-  - Elevated Cards / Containers: `#1c2128` with subtle hairline border `#30363d`.
-  - Body Text: `#e6edf3` (high legibility, optical compensation).
-  - Muted Text / Metadata: `#8b949e`.
-  - Accent / Focus: Electric Cyan/Blue `#38bdf8` (restrained, max 10% budget).
-- **Light Mode (Warm Archival Paper)**:
-  - Surface Canvas: Archival warm paper `#fbf9f5`.
-  - Elevated Cards / Containers: `#ffffff` with hairline `#e7e3da`.
-  - Body Text: Ink charcoal `#1c1917`.
-  - Muted Text / Metadata: `#78716c`.
-  - Accent: Royal Slate Blue `#0284c7`.
-- **Typography**:
-  - Headings & Wordmark: Plus Jakarta Sans / Inter Display with tight letter-spacing (`tracking-tight font-semibold`).
-  - Long-Form Reading Body: High-readability serif / clean sans prose (`leading-relaxed`, line length constrained to `65–75ch`).
-  - Code & Data Numerals: JetBrains Mono / monospace with tabular numbers (`tabular-nums font-mono`).
-- **Anti-Slop Discipline**:
-  - No static pills or badges for tags/categories (clean unboxed text with `·` separators).
-  - No code comments in titles (`// 01 ARCHITECTURE` is banned).
-  - No thick left accent borders (`border-l-4`).
-  - No decorative status dots or fake uptime tickers.
+- **Visual Identity Preservation**: Retain Underhood's deep charcoal dark theme (`#0d1117`), warm paper light theme (`#fbf9f5`), electric blue accent (`#0284c7`), and zero-pill typographic metadata discipline.
+- **3-Zone Header Contract**: Maintain clean single-line navigation (`Underhood` wordmark, `Writing`, `Topics`, `Experiments`, `About`, Cmd+K Search modal button, RSS modal button, Light/Dark toggle).
+- **Page Layouts & Routing**:
+  - `/` → Static Editorial Homepage featuring recent essays, lab spotlights, topic taxonomy, and editorial tenets.
+  - `/writing` → Static essay index with search and topic/tag filters.
+  - `/writing/[slug]` → Static MDX article reader with reading time, table of contents, and hydrated React diagrams.
+  - `/experiments` & `/experiments/[slug]` → Static engineering laboratory reports with interactive React telemetry simulators.
+  - `/topics` & `/topics/[slug]` → Static domain taxonomy indexes.
+  - `/about` → Static author profile and engineering principles.
+  - `/keystatic` → Hybrid local Keystatic CMS dashboard for visual MDX authoring.
+- **Draft Isolation**: Drafts (`status: draft`) are rendered in local dev preview, but strictly excluded from production SSG builds, RSS feeds, sitemaps, search indexes, and production route generation (returns 404).
 
-### Key User Flows
-```
-┌──────────────┐     Cmd+K / Search      ┌─────────────────────────┐
-│  Homepage    │ ──────────────────────> │  Command Palette Modal  │
-└──────┬───────┘                         └───────────┬─────────────┘
-       │                                             │
-       │ Click article / topic                       │ Select result
-       ▼                                             ▼
-┌──────────────┐     Select Article      ┌─────────────────────────┐
-│ Writing Hub  │ ──────────────────────> │ Long-Form Article View  │
-│  & Filters   │                         │ (TOC, Code, Progress)   │
-└──────────────┘                         └─────────────────────────┘
-       │
-       │ Navigate to Experiments
-       ▼
-┌───────────────────────────────┐        ┌─────────────────────────┐
-│ Engineering Laboratory Hub    │ ─────> │ Interactive Experiment  │
-│ (/experiments)                │        │ (Live telemetry & math) │
-└───────────────────────────────┘        └─────────────────────────┘
-```
-
-***
+---
 
 ## 3. Key Product Decisions & Trade-Offs
 
-- **Decision 1: Content Engine & MDX Architecture**
-  - *Chosen Approach*: Curated typed content models with MDX-compatible AST parsing and rich interactive React components (`<Callout>`, `<CodeBlock>`, `<ArchitectureDiagram>`, `<ExperimentVisualizer>`, `<ComparisonTable>`).
-  - *Why*: Allows seamless authoring of real markdown/frontmatter while rendering live, interactive diagramming and simulation widgets directly inline without fragile external iframe dependencies.
-  - *Alternatives Considered*: Pure static markdown string replacement (too limited for diagrams) vs. heavy external CMS (unnecessary complexity, violates requirement to avoid databases/CMS).
-- **Decision 2: Instant Search Architecture**
-  - *Chosen Approach*: Client-side inverted index generator with fuzzy substring matching and instantaneous `Cmd+K` keyboard palette.
-  - *Why*: Zero network latency, instant feedback, supports keyboard arrow navigation, matches title, excerpt, tags, and full body content with highlighted excerpts.
-- **Decision 3: Interactive Engineering Laboratory**
-  - *Chosen Approach*: Built-in interactive simulations modeling queuing theory (Little's Law, token bucket rate limiter, drop-tail vs bufferbloat queue dynamics) with live sliders, latency percentiles (p50, p95, p99), and SVG dynamic distribution graphs.
-  - *Why*: Delivers an unforgettable, hands-on demonstration of engineering principles under pressure.
+- **Decision 1: Astro Content Collections over Custom Loader**
+  - *Chosen Approach*: Replace custom Vite glob parser (`src/lib/content/index.ts`) with Astro's native `defineCollection` and `zod` schemas (`src/content/config.ts`).
+  - *Why*: Provides native build-time type safety, automatic slug handling, and built-in `<Content />` component rendering without custom markdown parsing logic.
+- **Decision 2: Hybrid Output Mode (`output: 'hybrid'` / `'static'` with SSR endpoints)**
+  - *Chosen Approach*: Build all public content statically at compile time, leaving `/keystatic` admin API routes dynamically served during local development.
+  - *Why*: Guarantees zero server overhead, top-tier TTFB, and offline reliability for public visitors while keeping Keystatic local editing functional.
+- **Decision 3: React Islands with Selective Hydration**
+  - *Chosen Approach*: Wrap interactive components in MDX or Astro pages with targeted directives (`client:visible` for `<NodeProcessDiagram />` and `<NodeThreadpoolVisualizer />`; `client:idle` for search/RSS modals).
+  - *Why*: Eliminates client JavaScript bundle overhead for article prose reading while preserving rich interactive canvas simulations.
 
-***
+---
 
 ## 4. Technical Architecture & Data Strategy
 
-### System & Component Layout
+### System Architecture Diagram
 
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│                          Underhood Web Client                          │
-│                                                                        │
-│  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │ Navigation Header: Wordmark | Writing | Topics | Lab | About     │  │
-│  │                    [Cmd+K Search] [Theme Toggle]                 │  │
-│  └──────────────────────────────────────────────────────────────────┘  │
-│                                                                        │
-│  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │ Reading Progress Rail (Active during article reading)            │  │
-│  └──────────────────────────────────────────────────────────────────┘  │
-│                                                                        │
-│  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │ Active Route View:                                               │  │
-│  │  ├─ HomeView (Hero, Lead Story, Grid, Topics, Lab Highlights)    │  │
-│  │  ├─ WritingView (Topic filters, search bar, article cards)       │  │
-│  │  ├─ ArticleView (Header, Sidebar TOC, MDX Prose, Visualizer)     │  │
-│  │  ├─ TopicsView / TopicDetailView (Domain taxonomy & essays)      │  │
-│  │  ├─ ExperimentsView / ExperimentDetailView (Live Lab Visualizers)│  │
-│  │  └─ AboutView (Author philosophy, principles, selected work)     │  │
-│  └──────────────────────────────────────────────────────────────────┘  │
-│                                                                        │
-│  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │ Footer: RSS feed, GitHub, Newsletter, Copyright, Back to top     │  │
-│  └──────────────────────────────────────────────────────────────────┘  │
-│                                                                        │
-│  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │ Global Modals: CommandPalette (Full-Text Search), ShareDialog    │  │
-│  └──────────────────────────────────────────────────────────────────┘  │
-└────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          Astro Static Site & CMS                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   ┌───────────────────────────┐         ┌───────────────────────────────┐   │
+│   │   Content Collections     │         │       Keystatic Admin         │   │
+│   │                           │         │       (Local Node/SSR)        │   │
+│   │  content/articles/*.mdx   │         │          /keystatic           │   │
+│   │  content/experiments/*.mdx│         └───────────────┬───────────────┘   │
+│   └─────────────┬─────────────┘                         │                   │
+│                 │ (Build-time validation & SSG)         │ (Local Git edit)  │
+│                 ▼                                       ▼                   │
+│   ┌───────────────────────────┐         ┌───────────────────────────────┐   │
+│   │    Astro Static Pages     │         │      Local Git Repository     │   │
+│   │  /writing, /experiments,  │         │   (No external DB/CMS)        │   │
+│   │  /topics, /about, /404    │         └───────────────────────────────┘   │
+│   └─────────────┬─────────────┘                                             │
+│                 │ (Hydrates only visualizers)                               │
+│                 ▼                                                           │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │  React Islands: NodeProcessDiagram, NodeThreadpoolVisualizer        │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Content Schema
+### Content Collections Schema (`src/content/config.ts`)
 
 ```typescript
-export interface Article {
-  slug: string;
-  title: string;
-  description: string;
-  date: string;
-  readingTime: string;
-  topic: TopicId;
-  tags: string[];
-  featured: boolean;
-  draft: boolean;
-  githubUrl?: string;
-  content: string; // Markdown / MDX body
-  toc: { id: string; title: string; level: number }[];
-  relatedSlugs: string[];
-}
+import { defineCollection, z } from 'astro:content';
 
-export interface Experiment {
-  slug: string;
-  title: string;
-  tagline: string;
-  date: string;
-  topic: TopicId;
-  hypothesis: string;
-  setup: string;
-  implementation: string;
-  keyFindings: string[];
-  limitations: string[];
-  githubRepo: string;
-  relatedArticleSlug?: string;
-  interactiveType: 'queue-backpressure' | 'grpc-multiplex' | 'cache-invalidation';
-}
+const articlesCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    slug: z.string().optional(),
+    description: z.string(),
+    date: z.string(),
+    status: z.enum(['draft', 'published']).default('draft'),
+    topic: z.enum([
+      'distributed-systems',
+      'backend-engineering',
+      'performance',
+      'system-design',
+      'cloud-infrastructure',
+      'engineering-experiments',
+      'lessons-learned'
+    ]),
+    tags: z.array(z.string()),
+    featured: z.boolean().default(false),
+    relatedArticles: z.array(z.string()).default([]),
+    relatedExperiments: z.array(z.string()).default([]),
+    githubUrl: z.string().url().optional()
+  })
+});
+
+const experimentsCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    slug: z.string().optional(),
+    tagline: z.string(),
+    date: z.string(),
+    status: z.enum(['draft', 'published']).default('draft'),
+    topic: z.enum([
+      'distributed-systems',
+      'backend-engineering',
+      'performance',
+      'system-design',
+      'cloud-infrastructure',
+      'engineering-experiments',
+      'lessons-learned'
+    ]),
+    hypothesis: z.string(),
+    setup: z.string(),
+    implementation: z.string(),
+    keyFindings: z.array(z.string()),
+    limitations: z.array(z.string()).default([]),
+    githubRepo: z.string().url(),
+    relatedArticleSlug: z.string().optional(),
+    interactiveType: z.enum(['node-threadpool', 'queue-backpressure', 'grpc-multiplex', 'cache-invalidation']).optional()
+  })
+});
+
+export const collections = {
+  articles: articlesCollection,
+  experiments: experimentsCollection
+};
 ```
 
-### Step-by-Step Implementation Strategy
+---
 
-1. **Step 1: Theme & Styling Foundation**
-   - Configure Tailwind CSS v4 dual-theme variables (`@custom-variant dark (&:where(.dark, .dark *));`) in `src/index.css`.
-   - Update `metadata.json` and `index.html` with production title, descriptions, open graph tags, and favicon.
-   - Establish design tokens (surface canvas, text contrast, code colors).
+## 5. Migration Execution Strategy & Phasing
 
-2. **Step 2: Core Components & Layout Shell**
-   - Create TopBar navigation following the strict 3-zone contract (Wordmark, Nav links, Action buttons).
-   - Implement ThemeProvider and ThemeToggle (Dark/Light with localStorage persistence).
-   - Implement ReadingProgressBar with smooth compositor scroll binding.
-   - Implement CommandPalette (`Cmd+K` / `Ctrl+K`) with instant keyboard navigation.
+### Phase 1 — Astro Migration
+1. **Dependencies**: Install `astro`, `@astrojs/mdx`, `@astrojs/react`, `@astrojs/tailwind`, `@astrojs/sitemap`, `rss`.
+2. **Astro Config**: Create `astro.config.mjs` with React, MDX, Tailwind, and Node/static adapters.
+3. **Content Collections**: Define `src/content/config.ts` and move/verify files under `src/content/articles/` and `src/content/experiments/`.
+4. **Astro Layouts & Pages**: Create `BaseLayout.astro`, `ArticleLayout.astro`, `ExperimentLayout.astro`, and Astro routes (`src/pages/index.astro`, `src/pages/writing/index.astro`, `src/pages/writing/[slug].astro`, `src/pages/experiments/index.astro`, `src/pages/experiments/[slug].astro`, `src/pages/topics/index.astro`, `src/pages/topics/[slug].astro`, `src/pages/about.astro`, `src/pages/rss.xml.ts`, `src/pages/404.astro`).
+5. **React Islands**: Mount interactive diagrams (`NodeProcessDiagram`, `NodeThreadpoolVisualizer`, `CommandPalette`, `RssModal`) with `client:visible` or `client:idle`.
+6. **Phase 1 Verification Gate**: Run `astro check`, `npm run build`, and Vitest test suite.
 
-3. **Step 3: Content Repository & Pipeline**
-   - Populate production-grade sample articles:
-     1. *"Backpressure Is Not an Overload Policy"* (Deep dive into TCP flow control vs application backpressure vs shed policies).
-     2. *"Understanding gRPC Flow Control"* (HTTP/2 stream windows, client buffers, and head-of-line blocking).
-     3. *"What Happens When a Queue Grows Without Bounds?"* (Bufferbloat, memory leaks, latency tail explosions).
-     4. *"Inside a Distributed System Failure"* (Cascading retries, thundering herds, and circuit breaker geometry).
-   - Populate engineering experiments with reproducible lab simulations:
-     1. *"Bounded Queues vs Drop-Tail Under Sudden Traffic Spikes"* (Interactive queue simulator with arrival rates, service rates, and drop policies).
-     2. *"gRPC HTTP/2 Stream Multiplexing Saturation"* (Interactive stream window visualizer).
-
-4. **Step 4: Long-Form Reader Experience**
-   - Markdown/MDX component renderer supporting:
-     - Interactive CodeBlock with syntax highlighting, language label, filename header, copy button with check feedback.
-     - ArchitectureDiagram (interactive SVG/Mermaid flowcharts with node inspectability).
-     - Callout blocks (Note, Warning, Insight, Principle).
-     - ComparisonTable with tabular numbers and highlighted metrics.
-     - Footnotes with anchor jump and hover previews.
-     - Auto-generated Table of Contents with active heading spy.
-     - Social share and link-copy controls.
-
-5. **Step 5: Discovery, Topics, Experiments & About**
-   - Build `/writing` index with topic filters, search filter, and tag chips.
-   - Build `/topics` and topic landing views.
-   - Build `/experiments` interactive lab workspace.
-   - Build `/about` with engineering philosophy, core tenets, and links.
-   - Implement RSS feed modal / exporter and site map representation.
-
-6. **Step 6: Quality, Verification & Packaging**
-   - Run compilation and linting checks.
-   - Validate responsive design across mobile (375px), tablet (768px), and desktop (1440px).
-   - Verify zero-pill metadata compliance, zero broken buttons, and keyboard accessibility.
+### Phase 2 — Keystatic Integration
+1. **Dependencies**: Install `@keystatic/core` and `@keystatic/astro`.
+2. **Config**: Create `keystatic.config.ts` configured for local storage, mapping `articles` and `experiments` collections with frontmatter fields and MDX document editor.
+3. **Keystatic Admin Page**: Create `src/pages/keystatic/[...params].astro`.
+4. **Verification**: Verify local editing at `/keystatic`, frontmatter saving, and MDX round-tripping.
+5. **Cleanup**: Remove obsolete Vite SPA entry points (`src/main.tsx`, Vite-only index parsing) and update `package.json` scripts (`"dev": "astro dev"`, `"build": "astro build"`).

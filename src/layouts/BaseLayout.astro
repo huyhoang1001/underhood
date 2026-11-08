@@ -1,0 +1,75 @@
+---
+import '../index.css';
+import { HeaderNav } from '../components/HeaderNav';
+import { FooterNav } from '../components/FooterNav';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogType?: string;
+  canonicalUrl?: string;
+}
+
+const {
+  title = "Underhood — Software Systems & Concurrency Deep Dives",
+  description = "Engineering blog exploring Node.js internals, event loops, distributed systems, system architecture, and reproducible benchmarks.",
+  ogType = "website",
+  canonicalUrl = Astro.url.href
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- OpenGraph / Social Cards -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content="Underhood Engineering" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- FOUC Prevention Script -->
+    <script is:inline>
+      (function() {
+        try {
+          var stored = localStorage.getItem('underhood_theme');
+          if (stored === 'light') {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+          } else {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body class="bg-[#fbf9f5] dark:bg-[#0d1117] text-[#1c1917] dark:text-[#f0f6fc] min-h-screen flex flex-col font-sans transition-colors duration-200 antialiased selection:bg-sky-500/25">
+    <HeaderNav client:load currentPath={Astro.url.pathname} />
+    <main class="flex-grow">
+      <slot />
+    </main>
+    <FooterNav client:load />
+  </body>
+</html>

@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import ExperimentLayout from '../../layouts/ExperimentLayout.astro';
+import { NodeThreadpoolVisualizer } from '../../components/NodeThreadpoolVisualizer';
+
+export async function getStaticPaths() {
+  const experiments = await getCollection('experiments', ({ data }) => {
+    return import.meta.env.DEV || data.status !== 'draft';
+  });
+
+  return experiments.map((experiment) => ({
+    params: { slug: experiment.slug },
+    props: { experiment }
+  }));
+}
+
+const { experiment } = Astro.props;
+const { Content } = await experiment.render();
+---
+
+<ExperimentLayout
+  title={experiment.data.title}
+  tagline={experiment.data.tagline}
+  date={experiment.data.date}
+  topic={experiment.data.topic}
+  status={experiment.data.status}
+  hypothesis={experiment.data.hypothesis}
+  setup={experiment.data.setup}
+  implementation={experiment.data.implementation}
+  keyFindings={experiment.data.keyFindings}
+  limitations={experiment.data.limitations}
+  githubRepo={experiment.data.githubRepo}
+  relatedArticleSlug={experiment.data.relatedArticleSlug}
+  interactiveType={experiment.data.interactiveType}
+>
+  <Content components={{ ThreadPoolVisualizer: NodeThreadpoolVisualizer, NodeThreadpoolVisualizer }} />
+</ExperimentLayout>

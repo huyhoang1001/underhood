@@ -1,0 +1,56 @@
+---
+import { getCollection } from 'astro:content';
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import { NodeProcessDiagram } from '../../components/NodeProcessDiagram';
+import { NodeThreadpoolVisualizer } from '../../components/NodeThreadpoolVisualizer';
+import { calculateReadingTime } from '../../utils/readingTime';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles', ({ data }) => {
+    return import.meta.env.DEV || data.status !== 'draft';
+  });
+
+  return articles.map((article) => ({
+    params: { slug: article.slug },
+    props: { article }
+  }));
+}
+
+const { article } = Astro.props;
+const { Content, headings } = await article.render();
+const readingTimeInfo = calculateReadingTime(article.body || '');
+
+const toc = headings.map((h) => ({
+  id: h.slug,
+  text: h.text,
+  level: h.depth
+}));
+
+const allArticles = await getCollection('articles', ({ data }) => {
+  return import.meta.env.DEV || data.status !== 'draft';
+});
+
+const relatedArticles = allArticles
+  .filter((a) => a.slug !== article.slug && (article.data.relatedArticles || []).includes(a.slug))
+  .map((a) => ({
+    slug: a.slug,
+    title: a.data.title,
+    readingTime: calculateReadingTime(a.body || '').formattedReadingTime
+  }));
+---
+
+<ArticleLayout
+  title={article.data.title}
+  description={article.data.description}
+  date={article.data.date}
+  topic={article.data.topic}
+  tags={article.data.tags}
+  readingTime={readingTimeInfo.formattedReadingTime}
+  wordCount={readingTimeInfo.wordCount}
+  githubUrl={article.data.githubUrl}
+  isDraft={article.data.status === 'draft'}
+  toc={toc}
+  relatedArticles={relatedArticles}
+>
+  <Content components={{ NodeProcessDiagram, NodeThreadpoolVisualizer, ThreadPoolVisualizer: NodeThreadpoolVisualizer }} />
+</ArticleLayout>

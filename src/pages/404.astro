@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
+---
+
+<BaseLayout title="Page Not Found — Underhood" description="The requested route does not exist or is currently restricted to local development review.">
+  <div className="py-16 sm:py-24 text-center max-w-xl mx-auto px-4 space-y-6">
+    <div className="inline-flex p-3 rounded-full bg-amber-500/10 text-amber-500">
+      <AlertCircle className="w-8 h-8" />
+    </div>
+    <h1 className="text-2xl sm:text-3xl font-bold text-[#1c1917] dark:text-[#f0f6fc]">
+      404 — Page Not Found
+    </h1>
+    <p className="text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+      The requested route does not exist or is currently restricted to local development review.
+    </p>
+    <div>
+      <a
+        href="/"
+        className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-sky-600 hover:bg-sky-500 rounded-md transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        <span>Return to Homepage</span>
+      </a>
+    </div>
+  </div>
+</BaseLayout>

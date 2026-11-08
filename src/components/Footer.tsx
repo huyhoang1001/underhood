@@ -1,16 +1,23 @@
 import React from 'react';
-import { ArrowUp, Github, Rss, ArrowUpRight } from 'lucide-react';
+import { ArrowUp, Github, Rss } from 'lucide-react';
 import { ViewRoute } from '../types';
 import { TOPIC_LIST } from '../data/topics';
 
 interface FooterProps {
-  onNavigate: (route: ViewRoute) => void;
+  onNavigate?: (route: ViewRoute) => void;
   onOpenRss: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenRss }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, route: ViewRoute) => {
+    if (onNavigate) {
+      e.preventDefault();
+      onNavigate(route);
+    }
   };
 
   return (
@@ -40,7 +47,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenRss }) => {
                 <span>RSS Feed</span>
               </button>
               <a
-                href="https://github.com"
+                href="https://github.com/huyhoang1001/underhood"
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-1.5 hover:text-[#1c1917] dark:hover:text-[#f0f6fc] transition-colors"
@@ -58,36 +65,40 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenRss }) => {
             </div>
             <ul className="space-y-1.5">
               <li>
-                <button
-                  onClick={() => onNavigate({ view: 'writing' })}
+                <a
+                  href="/writing"
+                  onClick={(e) => handleLinkClick(e, '/writing', { view: 'writing' })}
                   className="hover:text-[#1c1917] dark:hover:text-[#f0f6fc] transition-colors"
                 >
                   All Articles
-                </button>
+                </a>
               </li>
               <li>
-                <button
-                  onClick={() => onNavigate({ view: 'experiments' })}
+                <a
+                  href="/experiments"
+                  onClick={(e) => handleLinkClick(e, '/experiments', { view: 'experiments' })}
                   className="hover:text-[#1c1917] dark:hover:text-[#f0f6fc] transition-colors"
                 >
                   Engineering Lab
-                </button>
+                </a>
               </li>
               <li>
-                <button
-                  onClick={() => onNavigate({ view: 'topics' })}
+                <a
+                  href="/topics"
+                  onClick={(e) => handleLinkClick(e, '/topics', { view: 'topics' })}
                   className="hover:text-[#1c1917] dark:hover:text-[#f0f6fc] transition-colors"
                 >
                   Topic Directory
-                </button>
+                </a>
               </li>
               <li>
-                <button
-                  onClick={() => onNavigate({ view: 'about' })}
+                <a
+                  href="/about"
+                  onClick={(e) => handleLinkClick(e, '/about', { view: 'about' })}
                   className="hover:text-[#1c1917] dark:hover:text-[#f0f6fc] transition-colors"
                 >
                   Author & Principles
-                </button>
+                </a>
               </li>
             </ul>
           </div>
@@ -99,13 +110,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenRss }) => {
             </div>
             <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
               {TOPIC_LIST.slice(0, 6).map((topic) => (
-                <button
+                <a
                   key={topic.id}
-                  onClick={() => onNavigate({ view: 'topics', topicId: topic.id })}
+                  href={`/topics/${topic.id}`}
+                  onClick={(e) => handleLinkClick(e, `/topics/${topic.id}`, { view: 'topics', topicId: topic.id })}
                   className="text-left text-xs truncate hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
                 >
                   {topic.name}
-                </button>
+                </a>
               ))}
             </div>
           </div>

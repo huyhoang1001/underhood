@@ -11,16 +11,14 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('underhood_theme');
-      if (stored === 'light' || stored === 'dark') {
-        return stored;
-      }
-      return 'dark'; // Dark-first editorial default
+  const [theme, setThemeState] = useState<Theme>('dark');
+
+  useEffect(() => {
+    const stored = localStorage.getItem('underhood_theme');
+    if (stored === 'light' || stored === 'dark') {
+      setThemeState(stored);
     }
-    return 'dark';
-  });
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;

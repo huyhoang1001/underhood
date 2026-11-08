@@ -1,0 +1,99 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { calculateReadingTime } from '../../utils/readingTime';
+import { TOPIC_LIST } from '../../data/topics';
+import { BookOpen } from 'lucide-react';
+
+const articles = await getCollection('articles', ({ data }) => {
+  return import.meta.env.DEV || data.status !== 'draft';
+});
+
+const sortedArticles = articles.sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
+---
+
+<BaseLayout title="Writing — Underhood Engineering" description="Essays, architectural retrospectives, and deep technical analyses across distributed systems, runtime internals, and performance engineering.">
+  <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-10 py-8 sm:py-12">
+    <!-- Title & Introduction -->
+    <div className="space-y-3 max-w-2xl">
+      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc]">
+        Writing
+      </h1>
+      <p className="text-sm sm:text-base text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+        Essays, architectural retrospectives, and deep technical analyses across distributed systems, runtime internals, and performance engineering.
+      </p>
+    </div>
+
+    {sortedArticles.length === 0 ? (
+      <div className="py-16 sm:py-24 space-y-8 max-w-2xl mx-auto text-center">
+        <div className="inline-flex p-3 rounded-full bg-sky-500/10 text-sky-500">
+          <BookOpen className="w-8 h-8" />
+        </div>
+        <div className="space-y-3">
+          <h2 className="text-2xl font-bold tracking-tight text-[#1c1917] dark:text-[#f0f6fc]">
+            Writing & Engineering Essays
+          </h2>
+          <p className="text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed">
+            Underhood&apos;s upcoming technical investigations and reproducibility benchmarks are currently undergoing peer reproduction.
+          </p>
+        </div>
+      </div>
+    ) : (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between pb-2 border-b border-[#e7e3da] dark:border-[#30363d] text-xs font-mono text-[#78716c] dark:text-[#8b949e]">
+          <span>Showing {sortedArticles.length} {sortedArticles.length === 1 ? 'essay' : 'essays'}</span>
+          <span>Sorted by Publication Date</span>
+        </div>
+
+        <div className="divide-y divide-[#e7e3da] dark:divide-[#30363d]">
+          {sortedArticles.map((art) => {
+            const readingTimeInfo = calculateReadingTime(art.body || '');
+            return (
+              <article key={art.slug} className="group py-8 first:pt-0 space-y-3">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-[#78716c] dark:text-[#8b949e]">
+                  <a
+                    href={`/topics/${art.data.topic}`}
+                    className="font-semibold text-sky-600 dark:text-sky-400 uppercase tracking-wider text-[11px] hover:underline"
+                  >
+                    {art.data.topic.replace(/-/g, ' ')}
+                  </a>
+                  <span>·</span>
+                  <span>{art.data.date}</span>
+                  <span>·</span>
+                  <span>{readingTimeInfo.formattedReadingTime}</span>
+                  {art.data.status === 'draft' && (
+                    <>
+                      <span>·</span>
+                      <span className="font-mono text-amber-700 dark:text-amber-400 font-semibold text-[11px] uppercase tracking-wider">
+                        [Local Review Draft]
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                <h2 className="text-xl sm:text-2xl font-bold text-[#1c1917] dark:text-[#f0f6fc] group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                  <a href={`/writing/${art.slug}`}>{art.data.title}</a>
+                </h2>
+
+                <p className="text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed max-w-3xl">
+                  {art.data.description}
+                </p>
+
+                <div className="flex items-center gap-2 text-xs text-[#a8a29e] dark:text-[#6e7681] pt-1">
+                  {art.data.tags.map((tag, tIdx) => (
+                    <span key={tag}>
+                      {tIdx > 0 && <span className="mr-2">·</span>}
+                      <span>#{tag}</span>
+                    </span>
+                  ))}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    )}
+  </div>
+</BaseLayout>

@@ -9,7 +9,18 @@ export interface ParsedFrontmatter<T = Record<string, any>> {
  * Universal browser-safe frontmatter parser.
  * Extracts YAML between --- fences using js-yaml with zero Node.js Buffer dependency.
  */
-export function parseFrontmatter<T = Record<string, any>>(raw: string): ParsedFrontmatter<T> {
+export function parseFrontmatter<T = Record<string, any>>(rawInput: any): ParsedFrontmatter<T> {
+  let raw = '';
+  if (typeof rawInput === 'string') {
+    raw = rawInput;
+  } else if (rawInput && typeof rawInput === 'object') {
+    if (typeof rawInput.default === 'string') {
+      raw = rawInput.default;
+    } else if (rawInput.default && typeof rawInput.default.default === 'string') {
+      raw = rawInput.default.default;
+    }
+  }
+
   const trimmed = raw.trimStart();
   if (!trimmed.startsWith('---')) {
     return { data: {} as T, content: raw };

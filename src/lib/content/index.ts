@@ -13,15 +13,13 @@ import { TopicId, Article, Experiment } from '../../types';
 // Discover all MDX files at build time via Vite's eager raw glob
 const articleModules = import.meta.glob('/content/articles/*.mdx', {
   query: '?raw',
-  eager: true,
-  import: 'default'
-}) as Record<string, string>;
+  eager: true
+}) as Record<string, { default: string } | string>;
 
 const experimentModules = import.meta.glob('/content/experiments/*.mdx', {
   query: '?raw',
-  eager: true,
-  import: 'default'
-}) as Record<string, string>;
+  eager: true
+}) as Record<string, { default: string } | string>;
 
 // Helper to extract Table of Contents from markdown headings
 export function extractToc(content: string): { id: string; title: string; level: number }[] {
@@ -53,10 +51,10 @@ export function extractToc(content: string): { id: string; title: string; level:
 export function loadAllArticles(): ArticleDocument[] {
   const articles: ArticleDocument[] = [];
 
-  for (const [path, raw] of Object.entries(articleModules)) {
+  for (const [path, rawMod] of Object.entries(articleModules)) {
     if (path.includes('TEMPLATE')) continue;
     try {
-      const { data, content } = parseFrontmatter(raw);
+      const { data, content } = parseFrontmatter(rawMod);
       const parsed = ArticleFrontmatterSchema.safeParse(data);
 
       if (!parsed.success) {
@@ -88,9 +86,9 @@ export function loadAllArticles(): ArticleDocument[] {
 export function loadAllExperiments(): ExperimentDocument[] {
   const experiments: ExperimentDocument[] = [];
 
-  for (const [path, raw] of Object.entries(experimentModules)) {
+  for (const [path, rawMod] of Object.entries(experimentModules)) {
     try {
-      const { data, content } = parseFrontmatter(raw);
+      const { data, content } = parseFrontmatter(rawMod);
       const parsed = ExperimentFrontmatterSchema.safeParse(data);
 
       if (!parsed.success) {

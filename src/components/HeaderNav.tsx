@@ -8,6 +8,12 @@ export function HeaderNav({ currentPath }: { currentPath: string }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isRssOpen, setIsRssOpen] = useState(false);
 
+  React.useEffect(() => {
+    const handleOpenRss = () => setIsRssOpen(true);
+    window.addEventListener('open-rss-modal', handleOpenRss);
+    return () => window.removeEventListener('open-rss-modal', handleOpenRss);
+  }, []);
+
   return (
     <ThemeProvider>
       <TopBar

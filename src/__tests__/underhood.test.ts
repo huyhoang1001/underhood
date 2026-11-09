@@ -18,7 +18,6 @@ describe('Underhood Content Schema Validation', () => {
   it('validates correct article frontmatter according to schema', () => {
     const validArticle = {
       title: 'Distributed Consensus Under Partition',
-      slug: 'distributed-consensus-under-partition',
       description: 'Evaluating Raft leader election failure boundaries.',
       date: '2026-11-08',
       status: 'published' as const,
@@ -33,10 +32,9 @@ describe('Underhood Content Schema Validation', () => {
     expect(result.success).toBe(true);
   });
 
-  it('rejects invalid article frontmatter with bad slug or missing required fields', () => {
+  it('rejects invalid article frontmatter with missing required fields', () => {
     const invalidArticle = {
       title: '', // empty title
-      slug: 'INVALID SLUG WITH SPACES',
       description: 'Missing date and topic',
       tags: [] // empty tags
     };
@@ -46,7 +44,6 @@ describe('Underhood Content Schema Validation', () => {
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
       expect(fieldErrors.title).toBeDefined();
-      expect(fieldErrors.slug).toBeDefined();
       expect(fieldErrors.date).toBeDefined();
       expect(fieldErrors.topic).toBeDefined();
       expect(fieldErrors.tags).toBeDefined();
@@ -56,7 +53,6 @@ describe('Underhood Content Schema Validation', () => {
   it('validates experiment frontmatter and rejects missing hypothesis or invalid repo URL', () => {
     const invalidExp = {
       title: 'Broken Experiment',
-      slug: 'broken-experiment',
       tagline: 'Broken',
       date: '2026-11-08',
       status: 'draft',
@@ -79,13 +75,13 @@ describe('Draft Isolation & Query Policies', () => {
     // In production, no draft is exposed
     expect(prodArticles.every((a) => a.frontmatter.status === 'published')).toBe(true);
     // Since nodejs-single-threaded is a draft, it must not be in prodArticles
-    const draftFound = prodArticles.find((a) => a.frontmatter.slug === 'nodejs-single-threaded');
+    const draftFound = prodArticles.find((a) => a.slug === 'nodejs-single-threaded');
     expect(draftFound).toBeUndefined();
   });
 
   it('includes drafts when includeDrafts is explicitly set to true (local development preview)', () => {
     const devArticles = getArticles({ includeDrafts: true });
-    const nodeArticle = devArticles.find((a) => a.frontmatter.slug === 'nodejs-single-threaded');
+    const nodeArticle = devArticles.find((a) => a.slug === 'nodejs-single-threaded');
     expect(nodeArticle).toBeDefined();
     expect(nodeArticle?.frontmatter.status).toBe('draft');
     expect(nodeArticle?.frontmatter.topic).toBe('backend-engineering');
@@ -170,7 +166,6 @@ describe('Browser-Safe Frontmatter Parsing', () => {
     const { parseFrontmatter } = await import('../lib/content/parseFrontmatter');
     const raw = `---
 title: "Testing Concurrency"
-slug: testing-concurrency
 tags:
   - test
   - nodejs
@@ -181,7 +176,6 @@ This is body text.`;
 
     const { data, content } = parseFrontmatter<any>(raw);
     expect(data.title).toBe('Testing Concurrency');
-    expect(data.slug).toBe('testing-concurrency');
     expect(data.tags).toEqual(['test', 'nodejs']);
     expect(data.featured).toBe(true);
     expect(content.trim()).toBe('# Main Content\nThis is body text.');

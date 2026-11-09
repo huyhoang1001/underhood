@@ -1,7 +1,7 @@
 ---
 import '../index.css';
 import { HeaderNav } from '../components/HeaderNav';
-import { FooterNav } from '../components/FooterNav';
+import Footer from '../components/Footer.astro';
 
 interface Props {
   title?: string;
@@ -63,6 +63,9 @@ const {
           }
         } catch (e) {}
       })();
+      window.addEventListener('vite:preloadError', function(event) {
+        window.location.reload();
+      });
     </script>
   </head>
   <body class="bg-[#fbf9f5] dark:bg-[#0d1117] text-[#1c1917] dark:text-[#f0f6fc] min-h-screen flex flex-col font-sans transition-colors duration-200 antialiased selection:bg-sky-500/25">
@@ -70,6 +73,6 @@ const {
     <main class="flex-grow">
       <slot />
     </main>
-    <FooterNav client:load />
+    <Footer />
   </body>
 </html>

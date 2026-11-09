@@ -16,7 +16,6 @@ const articlesCollection = defineCollection({
   type: 'content',
   schema: z.object({
     title: z.string(),
-    slug: z.string().optional(),
     description: z.string(),
     date: z.string(),
     status: ContentStatusSchema.default('draft'),
@@ -33,7 +32,6 @@ const experimentsCollection = defineCollection({
   type: 'content',
   schema: z.object({
     title: z.string(),
-    slug: z.string().optional(),
     tagline: z.string(),
     date: z.string(),
     status: ContentStatusSchema.default('draft'),

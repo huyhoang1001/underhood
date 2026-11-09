@@ -54,6 +54,7 @@ export function loadAllArticles(): ArticleDocument[] {
   for (const [path, rawMod] of Object.entries(articleModules)) {
     if (path.includes('TEMPLATE')) continue;
     try {
+      const slug = path.split('/').pop()?.replace(/\.mdx$/, '') || '';
       const { data, content } = parseFrontmatter(rawMod);
       const parsed = ArticleFrontmatterSchema.safeParse(data);
 
@@ -66,6 +67,7 @@ export function loadAllArticles(): ArticleDocument[] {
       const toc = extractToc(content);
 
       articles.push({
+        slug,
         frontmatter: parsed.data,
         rawContent: content,
         readingTime: readingStats.text,
@@ -88,6 +90,7 @@ export function loadAllExperiments(): ExperimentDocument[] {
 
   for (const [path, rawMod] of Object.entries(experimentModules)) {
     try {
+      const slug = path.split('/').pop()?.replace(/\.mdx$/, '') || '';
       const { data, content } = parseFrontmatter(rawMod);
       const parsed = ExperimentFrontmatterSchema.safeParse(data);
 
@@ -97,6 +100,7 @@ export function loadAllExperiments(): ExperimentDocument[] {
       }
 
       experiments.push({
+        slug,
         frontmatter: parsed.data,
         rawContent: content
       });
@@ -112,7 +116,7 @@ export function loadAllExperiments(): ExperimentDocument[] {
 // Convert ArticleDocument to Article view model
 export function toArticle(doc: ArticleDocument): Article {
   return {
-    slug: doc.frontmatter.slug,
+    slug: doc.slug,
     title: doc.frontmatter.title,
     description: doc.frontmatter.description,
     date: doc.frontmatter.date,
@@ -132,7 +136,7 @@ export function toArticle(doc: ArticleDocument): Article {
 // Convert ExperimentDocument to Experiment view model
 export function toExperiment(doc: ExperimentDocument): Experiment {
   return {
-    slug: doc.frontmatter.slug,
+    slug: doc.slug,
     title: doc.frontmatter.title,
     tagline: doc.frontmatter.tagline,
     date: doc.frontmatter.date,
@@ -182,7 +186,7 @@ export function getArticles(options: ContentQueryOptions = {}): ArticleDocument[
  */
 export function getArticleBySlug(slug: string, options: ContentQueryOptions = {}): ArticleDocument | undefined {
   const includeDrafts = options.includeDrafts ?? isDevEnvironment;
-  const article = ALL_ARTICLES.find((a) => a.frontmatter.slug === slug);
+  const article = ALL_ARTICLES.find((a) => a.slug === slug);
   if (!article) return undefined;
   if (!includeDrafts && article.frontmatter.status === 'draft') {
     return undefined;
@@ -208,7 +212,7 @@ export function getExperiments(options: ContentQueryOptions = {}): ExperimentDoc
  */
 export function getExperimentBySlug(slug: string, options: ContentQueryOptions = {}): ExperimentDocument | undefined {
   const includeDrafts = options.includeDrafts ?? isDevEnvironment;
-  const exp = ALL_EXPERIMENTS.find((e) => e.frontmatter.slug === slug);
+  const exp = ALL_EXPERIMENTS.find((e) => e.slug === slug);
   if (!exp) return undefined;
   if (!includeDrafts && exp.frontmatter.status === 'draft') {
     return undefined;

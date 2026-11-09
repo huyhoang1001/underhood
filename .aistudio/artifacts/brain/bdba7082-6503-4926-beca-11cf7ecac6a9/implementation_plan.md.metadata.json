@@ -1,6 +1,6 @@
 {
-  "summary":  "Implementation plan to fix Keystatic admin integration by enabling hybrid rendering, configuring GitHub authentication, and resolving environment variable resolution issues in Astro 5.",
-  "updatedAt":  "2026-11-08T10:36:40.631882404Z",
+  "summary":  "Implementation plan to remove redundant slug frontmatter from articles and experiments, update validation script to scan src/content/ with strict validation, and ensure Keystatic schema matches Astro Content Collections.",
+  "updatedAt":  "2026-11-08T11:00:11.238666119Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

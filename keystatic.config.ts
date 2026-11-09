@@ -37,7 +37,7 @@ export default config({
       path: 'src/content/articles/*',
       format: { contentField: 'content' },
       schema: {
-        title: fields.slug({ name: { label: 'Title' } }),
+        title: fields.text({ label: 'Title' }),
         description: fields.text({ label: 'Description', multiline: true }),
         date: fields.date({ label: 'Publication Date' }),
         status: fields.select({
@@ -91,7 +91,7 @@ export default config({
       path: 'src/content/experiments/*',
       format: { contentField: 'content' },
       schema: {
-        title: fields.slug({ name: { label: 'Title' } }),
+        title: fields.text({ label: 'Title' }),
         tagline: fields.text({ label: 'Tagline', multiline: true }),
         date: fields.date({ label: 'Date' }),
         status: fields.select({

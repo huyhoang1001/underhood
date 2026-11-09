@@ -15,7 +15,6 @@ export const ContentStatusSchema = z.enum(['draft', 'published']);
 
 export const ArticleFrontmatterSchema = z.object({
   title: z.string().min(1, 'Article title is required'),
-  slug: z.string().min(1, 'Article slug is required').regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   description: z.string().min(1, 'Article description is required'),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
   status: ContentStatusSchema.default('draft'),
@@ -39,7 +38,6 @@ export type ArticleFrontmatter = z.infer<typeof ArticleFrontmatterSchema>;
 
 export const ExperimentFrontmatterSchema = z.object({
   title: z.string().min(1, 'Experiment title is required'),
-  slug: z.string().min(1, 'Experiment slug is required').regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   tagline: z.string().min(1, 'Tagline is required'),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
   status: ContentStatusSchema.default('draft'),
@@ -57,6 +55,7 @@ export const ExperimentFrontmatterSchema = z.object({
 export type ExperimentFrontmatter = z.infer<typeof ExperimentFrontmatterSchema>;
 
 export interface ArticleDocument {
+  slug: string;
   frontmatter: ArticleFrontmatter;
   rawContent: string;
   readingTime: string;
@@ -65,6 +64,7 @@ export interface ArticleDocument {
 }
 
 export interface ExperimentDocument {
+  slug: string;
   frontmatter: ExperimentFrontmatter;
   rawContent: string;
 }

@@ -1,24 +1,23 @@
 ---
-title: "Node.js libuv Thread Pool Saturation & Event Loop Delay"
-slug: nodejs-threadpool
-tagline: "Empirical benchmark of crypto.pbkdf2 worker saturation, UV_THREADPOOL_SIZE scaling, and Event Loop delay during synchronous CPU execution."
-date: "2026-11-08"
+title: Node.js libuv Thread Pool Saturation & Event Loop Delay
+tagline: Empirical benchmark of crypto.pbkdf2 worker saturation, UV_THREADPOOL_SIZE scaling, and Event Loop delay during synchronous CPU execution.
+date: '2026-11-08'
 status: draft
 topic: backend-engineering
-hypothesis: "Under default configuration (UV_THREADPOOL_SIZE=4), submitting 8 asynchronous PBKDF2 operations executes in two distinct waves of ~250ms each with total completion time doubling to ~560ms due to libuv thread pool queueing. Increasing UV_THREADPOOL_SIZE to 8 admits all jobs concurrently but encounters CPU core contention."
-setup: "Node.js v22 on Linux x86_64 running reproducible test harness scripts under experiments/node-concurrency/. Jobs measured with high-resolution performance.now() and perf_hooks.monitorEventLoopDelay()."
-implementation: "Evaluated crypto.pbkdf2 across pool sizes 4 and 8, HTTP server event loop delay under synchronous blocking loop, socket concurrency vs Promise.all CPU callbacks, and node:worker_threads offloading."
+hypothesis: Under default configuration (UV_THREADPOOL_SIZE=4), submitting 8 asynchronous PBKDF2 operations executes in two distinct waves of ~250ms each with total completion time doubling to ~560ms due to libuv thread pool queueing. Increasing UV_THREADPOOL_SIZE to 8 admits all jobs concurrently but encounters CPU core contention.
+setup: Node.js v22 on Linux x86_64 running reproducible test harness scripts under experiments/node-concurrency/. Jobs measured with high-resolution performance.now() and perf_hooks.monitorEventLoopDelay().
+implementation: Evaluated crypto.pbkdf2 across pool sizes 4 and 8, HTTP server event loop delay under synchronous blocking loop, socket concurrency vs Promise.all CPU callbacks, and node:worker_threads offloading.
 keyFindings:
-  - "With UV_THREADPOOL_SIZE=4, 4 PBKDF2 jobs completed in 269.9ms. Submitting 8 jobs executed in two 4-job waves, completing in 563.6ms."
-  - "Increasing UV_THREADPOOL_SIZE to 8 allowed all 8 jobs to execute immediately, finishing in 577.5ms due to CPU core time-slicing."
-  - "A synchronous CPU task blocked the Event Loop for 578.29ms, causing unrelated /ping requests to wait 579ms."
-  - "10 concurrent asynchronous TCP socket operations overlapped via the OS kernel in 79.9ms total without consuming thread pool threads."
-  - "Promise.all() executing 4 x 60ms CPU tasks ran strictly sequentially on the main thread in 241.1ms total."
-  - "Offloading CPU execution to node:worker_threads allowed the main thread to execute 94 heartbeat ticks with a max lag of only 0.055ms."
+  - With UV_THREADPOOL_SIZE=4, 4 PBKDF2 jobs completed in 269.9ms. Submitting 8 jobs executed in two 4-job waves, completing in 563.6ms.
+  - Increasing UV_THREADPOOL_SIZE to 8 allowed all 8 jobs to execute immediately, finishing in 577.5ms due to CPU core time-slicing.
+  - A synchronous CPU task blocked the Event Loop for 578.29ms, causing unrelated /ping requests to wait 579ms.
+  - 10 concurrent asynchronous TCP socket operations overlapped via the OS kernel in 79.9ms total without consuming thread pool threads.
+  - Promise.all() executing 4 x 60ms CPU tasks ran strictly sequentially on the main thread in 241.1ms total.
+  - Offloading CPU execution to node:worker_threads allowed the main thread to execute 94 heartbeat ticks with a max lag of only 0.055ms.
 limitations:
-  - "Exact millisecond numbers vary based on host CPU core availability and frequency scaling."
-  - "PBKDF2 is CPU-intensive native C++; disk I/O libuv workers exhibit different wait characteristics due to storage controller latency."
-githubRepo: "https://github.com/huyhoang1001/underhood/tree/main/experiments/node-concurrency"
+  - Exact millisecond numbers vary based on host CPU core availability and frequency scaling.
+  - PBKDF2 is CPU-intensive native C++; disk I/O libuv workers exhibit different wait characteristics due to storage controller latency.
+githubRepo: https://github.com/huyhoang1001/underhood/tree/main/experiments/node-concurrency
 relatedArticleSlug: nodejs-single-threaded
 interactiveType: node-threadpool
 ---

@@ -5,16 +5,13 @@ import tailwindcss from '@tailwindcss/vite';
 import vercel from '@astrojs/vercel';
 import keystatic from '@keystatic/astro';
 
-const isProd = process.env.NODE_ENV === 'production';
-
 export default defineConfig({
   output: 'server',
   adapter: vercel(),
   integrations: [
     react(),
     mdx(),
-    // Keystatic only runs locally — in production, content is managed via git
-    ...(isProd ? [] : [keystatic()]),
+    keystatic(),
   ],
   env: {
     schema: {

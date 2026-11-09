@@ -18,16 +18,9 @@ const ThreadPoolVisualizerBlock = block({
 
 export default config({
   storage: {
-    kind: 'local',
+    kind: 'github',
+    repo: 'huyhoang1001/underhood',
   },
-  ...(process.env.NODE_ENV === 'production'
-    ? {
-        storage: {
-          kind: 'github',
-          repo: 'huyhoang1001/underhood',
-        },
-      }
-    : {}),
   collections: {
     articles: collection({
       label: 'Articles',

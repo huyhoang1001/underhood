@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, BookOpen, FlaskConical, Rss, Clock } from 'lucide-react';
+import { ArrowRight, BookOpen, FlaskConical, Rss } from 'lucide-react';
 import { getArticles, getExperiments, toArticle, toExperiment } from '../lib/content';
 import { TOPIC_LIST } from '../data/topics';
 import { AUTHOR } from '../data/author';

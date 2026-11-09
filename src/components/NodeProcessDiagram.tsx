@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Cpu, Layers, Network, HardDrive, RefreshCw, Terminal, ArrowRight } from 'lucide-react';
+import { Layers } from 'lucide-react';
 
 interface RuntimeLayer {
   id: string;

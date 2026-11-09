@@ -6,7 +6,6 @@ import {
 import {
   getArticles,
   getArticleBySlug,
-  getExperiments,
   getExperimentBySlug,
   extractToc
 } from '../lib/content';

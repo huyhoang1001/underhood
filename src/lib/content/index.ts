@@ -4,8 +4,6 @@ import {
   ExperimentFrontmatterSchema,
   ArticleDocument,
   ExperimentDocument,
-  ArticleFrontmatter,
-  ExperimentFrontmatter
 } from './schema';
 import { calculateReadingTime } from '../../utils/readingTime';
 import { TopicId, Article, Experiment } from '../../types';

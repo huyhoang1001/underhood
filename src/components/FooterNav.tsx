@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Footer } from './Footer';
 import { RssModal } from './RssModal';
 import { ThemeProvider } from './ThemeContext';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sliders, Activity, Clock, Cpu, CheckCircle2 } from 'lucide-react';
+import { Activity } from 'lucide-react';
 
 export const NodeThreadpoolVisualizer: React.FC = () => {
   const [threadpoolSize, setThreadpoolSize] = useState<number>(4);

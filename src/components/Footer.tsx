@@ -13,7 +13,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenRss }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, route: ViewRoute) => {
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, _href: string, route: ViewRoute) => {
     if (onNavigate) {
       e.preventDefault();
       onNavigate(route);

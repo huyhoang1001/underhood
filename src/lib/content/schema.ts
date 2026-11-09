@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { TopicId } from '../../types';
 
 export const TopicIdSchema = z.enum([
   'distributed-systems',

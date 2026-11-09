@@ -27,7 +27,7 @@ export const TopBar: React.FC<TopBarProps> = ({
     }
   }, []);
 
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, route: ViewRoute) => {
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, _href: string, route: ViewRoute) => {
     if (onNavigate) {
       e.preventDefault();
       onNavigate(route);

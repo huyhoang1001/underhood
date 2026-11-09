@@ -1,5 +1,5 @@
 import React from 'react';
-import { Github, Twitter, Mail, Rss, ArrowUpRight, Terminal, Shield, Cpu, Activity } from 'lucide-react';
+import { Github, Mail, Rss, ArrowUpRight } from 'lucide-react';
 import { AUTHOR } from '../data/author';
 import { ViewRoute } from '../types';
 
@@ -8,7 +8,7 @@ interface AboutViewProps {
   onOpenRss: () => void;
 }
 
-export const AboutView: React.FC<AboutViewProps> = ({ onNavigate, onOpenRss }) => {
+export const AboutView: React.FC<AboutViewProps> = ({ onOpenRss }) => {
   return (
     <div className="py-8 sm:py-12 space-y-12 max-w-3xl">
       {/* Intro Header */}

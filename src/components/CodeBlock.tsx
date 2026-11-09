@@ -92,7 +92,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
 };
 
 // Lightweight syntax renderer for common keywords & comments
-function renderSyntaxLine(line: string, language: string): React.ReactNode {
+function renderSyntaxLine(line: string, _language: string): React.ReactNode {
   // Comments
   if (line.trim().startsWith('//') || line.trim().startsWith('#')) {
     return <span className="text-[#656d76] dark:text-[#8b949e] italic">{line}</span>;

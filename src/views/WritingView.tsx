@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, X, BookOpen, Rss, Clock } from 'lucide-react';
+import { Search, X, BookOpen, Rss } from 'lucide-react';
 import { getArticles, toArticle } from '../lib/content';
 import { TOPIC_LIST } from '../data/topics';
 import { ViewRoute, TopicId } from '../types';

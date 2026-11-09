@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Compass, BookOpen, Terminal } from 'lucide-react';
+import { ArrowLeft, BookOpen, Terminal } from 'lucide-react';
 import { ViewRoute } from '../types';
 
 interface NotFoundViewProps {

@@ -24,7 +24,7 @@ const readingTimeInfo = calculateReadingTime(article.body || '');
 
 const toc = headings.map((h) => ({
   id: h.slug,
-  text: h.text,
+  title: h.text,
   level: h.depth
 }));
 

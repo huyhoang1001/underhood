@@ -5,6 +5,8 @@ import { TOPIC_LIST, TOPICS } from '../../data/topics';
 import { calculateReadingTime } from '../../utils/readingTime';
 import { ArrowLeft, ArrowRight } from '@lucide/astro';
 
+export const prerender = true;
+
 export async function getStaticPaths() {
   return TOPIC_LIST.map((topic) => ({
     params: { slug: topic.id },

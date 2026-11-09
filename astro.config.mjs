@@ -2,14 +2,12 @@ import { defineConfig, envField } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
-import node from '@astrojs/node';
+import vercel from '@astrojs/vercel';
 import keystatic from '@keystatic/astro';
 
 export default defineConfig({
-  output: 'static',
-  adapter: node({
-    mode: 'standalone'
-  }),
+  output: 'server',
+  adapter: vercel(),
   integrations: [
     react(),
     mdx(),
@@ -52,8 +50,4 @@ export default defineConfig({
       }
     }
   },
-  server: {
-    port: 3000,
-    host: '0.0.0.0'
-  }
 });

@@ -16,10 +16,11 @@ export async function getStaticPaths() {
 
 const { experiment } = Astro.props;
 const { Content } = await experiment.render();
+const experimentTitle = experiment.data.title ?? experiment.slug.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 ---
 
 <ExperimentLayout
-  title={experiment.data.title}
+  title={experimentTitle}
   tagline={experiment.data.tagline}
   date={experiment.data.date}
   topic={experiment.data.topic}

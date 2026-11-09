@@ -30,17 +30,20 @@ const allArticles = await getCollection('articles', ({ data }) => {
   return import.meta.env.DEV || data.status !== 'draft';
 });
 
+const getTitle = (slug: string, title?: string) =>
+  title ?? slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
 const relatedArticles = allArticles
   .filter((a) => a.slug !== article.slug && (article.data.relatedArticles || []).includes(a.slug))
   .map((a) => ({
     slug: a.slug,
-    title: a.data.title,
+    title: getTitle(a.slug, a.data.title),
     readingTime: calculateReadingTime(a.body || '').formattedReadingTime
   }));
 ---
 
 <ArticleLayout
-  title={article.data.title}
+  title={getTitle(article.slug, article.data.title)}
   description={article.data.description}
   date={article.data.date}
   topic={article.data.topic}

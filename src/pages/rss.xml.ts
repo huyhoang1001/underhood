@@ -18,8 +18,9 @@ export const GET: APIRoute = async (context) => {
   });
 
   articles.forEach((art: CollectionEntry<'articles'>) => {
+    const title = art.data.title ?? art.slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     feed.item({
-      title: art.data.title,
+      title,
       description: art.data.description,
       url: `${context.site?.toString() || 'https://underhood.dev'}/writing/${art.slug}`,
       date: art.data.date,

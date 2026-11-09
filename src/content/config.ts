@@ -12,12 +12,17 @@ const TopicIdSchema = z.enum([
 
 const ContentStatusSchema = z.enum(['draft', 'published']);
 
+// Keystatic saves dates as YAML date objects (unquoted), so we coerce to string
+const DateSchema = z.union([z.string(), z.date()]).transform(v =>
+  v instanceof Date ? v.toISOString().slice(0, 10) : v
+);
+
 const articlesCollection = defineCollection({
   type: 'content',
   schema: z.object({
-    title: z.string(),
+    title: z.string().optional(), // Keystatic uses slugField, so title may not be in frontmatter
     description: z.string(),
-    date: z.string(),
+    date: DateSchema,
     status: ContentStatusSchema.default('draft'),
     topic: TopicIdSchema,
     tags: z.array(z.string()),
@@ -31,9 +36,9 @@ const articlesCollection = defineCollection({
 const experimentsCollection = defineCollection({
   type: 'content',
   schema: z.object({
-    title: z.string(),
+    title: z.string().optional(), // Keystatic uses slugField, so title may not be in frontmatter
     tagline: z.string(),
-    date: z.string(),
+    date: DateSchema,
     status: ContentStatusSchema.default('draft'),
     topic: TopicIdSchema,
     hypothesis: z.string(),

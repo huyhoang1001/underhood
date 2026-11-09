@@ -1,22 +1,20 @@
-import { config, fields, collection, component } from '@keystatic/core';
+import { config, fields, collection } from '@keystatic/core';
+import { block } from '@keystatic/core/content-components';
 
-const NodeProcessDiagramBlock = component({
+const NodeProcessDiagramBlock = block({
   label: 'Node.js Process Diagram',
-  schema: {},
-  preview: () => null
-}) as any;
+  schema: {}
+});
 
-const NodeThreadpoolVisualizerBlock = component({
+const NodeThreadpoolVisualizerBlock = block({
   label: 'Node.js Threadpool Visualizer',
-  schema: {},
-  preview: () => null
-}) as any;
+  schema: {}
+});
 
-const ThreadPoolVisualizerBlock = component({
+const ThreadPoolVisualizerBlock = block({
   label: 'Thread Pool Visualizer',
-  schema: {},
-  preview: () => null
-}) as any;
+  schema: {}
+});
 
 export default config({
   storage: {

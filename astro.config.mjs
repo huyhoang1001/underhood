@@ -43,7 +43,7 @@ export default defineConfig({
             name: 'esbuild-keystatic-env-fix',
             setup(build) {
               build.onResolve({ filter: /^astro:env\/server$/ }, () => ({
-                path: '/app/applet/src/env-shim.ts',
+                path: new URL('./src/env-shim.ts', import.meta.url).pathname,
                 external: false
               }));
             }

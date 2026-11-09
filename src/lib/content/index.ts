@@ -113,11 +113,19 @@ export function loadAllExperiments(): ExperimentDocument[] {
   return experiments.sort((a, b) => new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime());
 }
 
+// Derive a human-readable title from a slug when frontmatter title is absent
+function titleFromSlug(slug: string): string {
+  return slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 // Convert ArticleDocument to Article view model
 export function toArticle(doc: ArticleDocument): Article {
   return {
     slug: doc.slug,
-    title: doc.frontmatter.title,
+    title: doc.frontmatter.title ?? titleFromSlug(doc.slug),
     description: doc.frontmatter.description,
     date: doc.frontmatter.date,
     readingTime: doc.readingTime,
@@ -137,7 +145,7 @@ export function toArticle(doc: ArticleDocument): Article {
 export function toExperiment(doc: ExperimentDocument): Experiment {
   return {
     slug: doc.slug,
-    title: doc.frontmatter.title,
+    title: doc.frontmatter.title ?? titleFromSlug(doc.slug),
     tagline: doc.frontmatter.tagline,
     date: doc.frontmatter.date,
     status: doc.frontmatter.status,

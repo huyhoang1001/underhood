@@ -13,10 +13,18 @@ export const TopicIdSchema = z.enum([
 
 export const ContentStatusSchema = z.enum(['draft', 'published']);
 
+// Keystatic saves dates as YAML date objects (unquoted), so we coerce to YYYY-MM-DD string
+const DateSchema = z
+  .union([z.string(), z.date()])
+  .transform((v) => (v instanceof Date ? v.toISOString().slice(0, 10) : v))
+  .pipe(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'));
+
 export const ArticleFrontmatterSchema = z.object({
-  title: z.string().min(1, 'Article title is required'),
+  // Keystatic uses title as slugField so it may be omitted from frontmatter;
+  // callers should fall back to deriving title from the slug.
+  title: z.string().min(1).optional(),
   description: z.string().min(1, 'Article description is required'),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
+  date: DateSchema,
   status: ContentStatusSchema.default('draft'),
   topic: TopicIdSchema,
   tags: z.array(z.string()).min(1, 'At least one tag is required'),
@@ -37,9 +45,9 @@ export const ArticleFrontmatterSchema = z.object({
 export type ArticleFrontmatter = z.infer<typeof ArticleFrontmatterSchema>;
 
 export const ExperimentFrontmatterSchema = z.object({
-  title: z.string().min(1, 'Experiment title is required'),
+  title: z.string().min(1).optional(),
   tagline: z.string().min(1, 'Tagline is required'),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
+  date: DateSchema,
   status: ContentStatusSchema.default('draft'),
   topic: TopicIdSchema,
   hypothesis: z.string().min(1, 'Hypothesis is required'),

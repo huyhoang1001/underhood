@@ -74,7 +74,7 @@ const sortedArticles = articles.sort(
                 </div>
 
                 <h2 class="text-xl sm:text-2xl font-bold text-[#1c1917] dark:text-[#f0f6fc] group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
-                  <a href={`/writing/${art.slug}`}>{art.data.title}</a>
+                  <a href={`/writing/${art.slug}`}>{art.data.title ?? art.slug.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</a>
                 </h2>
 
                 <p class="text-sm text-[#78716c] dark:text-[#8b949e] leading-relaxed max-w-3xl">

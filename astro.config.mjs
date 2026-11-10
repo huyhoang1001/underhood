@@ -14,6 +14,14 @@ export default defineConfig({
     mdx(),
     keystatic(),
   ],
+  security: {
+    allowedDomains: [
+      // Allow any *.vercel.app subdomain over https
+      { protocol: 'https', hostname: '**.vercel.app' },
+      // Allow any custom domain (add your own domain here if you have one)
+      { protocol: 'https', hostname: 'underhood-navy.vercel.app' },
+    ],
+  },
   env: {
     schema: {
       KEYSTATIC_GITHUB_CLIENT_ID: envField.string({ context: 'server', access: 'secret', optional: true }),

@@ -1,0 +1,10 @@
+---
+import { MermaidDiagram } from './MermaidDiagram';
+
+interface Props {
+  chart: string;
+}
+
+const { chart } = Astro.props;
+---
+<MermaidDiagram chart={chart} client:visible />

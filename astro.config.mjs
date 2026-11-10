@@ -4,6 +4,7 @@ import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 import vercel from '@astrojs/vercel';
 import keystatic from '@keystatic/astro';
+import { remarkMermaid } from './src/plugins/remark-mermaid.mjs';
 
 export default defineConfig({
   site: 'https://underhood-navy.vercel.app',
@@ -16,11 +17,12 @@ export default defineConfig({
   ],
   security: {
     allowedDomains: [
-      // Allow any *.vercel.app subdomain over https
       { protocol: 'https', hostname: '**.vercel.app' },
-      // Allow any custom domain (add your own domain here if you have one)
       { protocol: 'https', hostname: 'underhood-navy.vercel.app' },
     ],
+  },
+  markdown: {
+    remarkPlugins: [remarkMermaid],
   },
   env: {
     schema: {

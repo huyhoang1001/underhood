@@ -33,7 +33,7 @@ const {
   limitations = [],
   githubRepo,
   relatedArticleSlug,
-  interactiveType = 'node-threadpool'
+  interactiveType = undefined
 } = Astro.props;
 ---
 
@@ -132,7 +132,7 @@ const {
       </div>
     </div>
 
-    <!-- Interactive Simulator -->
+    {interactiveType && (
     <div class="space-y-2">
       <div class="flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider text-[#78716c] dark:text-[#8b949e]">
         <Sliders class="w-3.5 h-3.5 text-sky-500" />
@@ -140,7 +140,7 @@ const {
       </div>
       <ExperimentVisualizer client:visible type={interactiveType} />
     </div>
-
+    )}
     <!-- Key Findings -->
     <div class="space-y-3">
       <div class="flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider text-[#78716c] dark:text-[#8b949e]">

@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import ArticleLayout from '../../layouts/ArticleLayout.astro';
 import NodeProcessDiagramIsland from '../../components/NodeProcessDiagramIsland.astro';
 import NodeThreadpoolVisualizerIsland from '../../components/NodeThreadpoolVisualizerIsland.astro';
+import TokioArchitectureDiagramIsland from '../../components/TokioArchitectureDiagramIsland.astro';
 import { calculateReadingTime } from '../../utils/readingTime';
 
 export const prerender = true;
@@ -58,5 +59,5 @@ const relatedArticles = allArticles
   toc={toc}
   relatedArticles={relatedArticles}
 >
-  <Content components={{ NodeProcessDiagram: NodeProcessDiagramIsland, NodeThreadpoolVisualizer: NodeThreadpoolVisualizerIsland, ThreadPoolVisualizer: NodeThreadpoolVisualizerIsland }} />
+  <Content components={{ NodeProcessDiagram: NodeProcessDiagramIsland, NodeThreadpoolVisualizer: NodeThreadpoolVisualizerIsland, ThreadPoolVisualizer: NodeThreadpoolVisualizerIsland, TokioArchitectureDiagram: TokioArchitectureDiagramIsland }} />
 </ArticleLayout>

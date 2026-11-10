@@ -1,0 +1,22 @@
+[package]
+name = "rust-tokio-blocking"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "rust-tokio-blocking"
+path = "src/main.rs"
+
+[dependencies]
+axum = { version = "0.7.9", features = [] }
+tokio = { version = "1.42.0", features = ["full"] }
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = { version = "1.0.134" }
+tower = { version = "0.5.2" }
+
+[dev-dependencies]
+proptest = "1.5.0"
+http-body-util = "0.1"
+
+[profile.release]
+opt-level = 3

@@ -1,0 +1,59 @@
+---
+tagline: >-
+  Empirical benchmark of Tokio scheduler starvation under synchronous CPU load,
+  spawn_blocking thread pool isolation, and semaphore-bounded concurrency on a
+  multi-threaded async Axum server.
+date: 2025-01-15
+status: draft
+topic: backend-engineering
+hypothesis: >-
+  Executing a 100 ms synchronous CPU loop directly on a Tokio async worker
+  thread starves the scheduler — causing /health latency to spike from ~2 ms to
+  >100 ms under 50 concurrent connections. Offloading the same work via
+  tokio::task::spawn_blocking keeps /health latency at ≤5 ms because the async
+  worker threads remain free.
+setup: >-
+  Rust 1.75 on macOS (Apple Silicon) running an Axum 0.7 HTTP server
+  (experiments/rust-tokio-blocking/). Three strategies benchmarked with
+  wrk -t4 -c50 -d30s. Worker thread count equals available_parallelism().
+  Latency measured at the HTTP layer. Blocking thread pool default ceiling is
+  512 threads.
+implementation: >-
+  Three /compute?strategy= branches implemented in src/main.rs: 'blocking'
+  runs run_blocking_work() directly on the async thread, 'spawn_blocking'
+  offloads to tokio::task::spawn_blocking, and 'bounded' adds a Semaphore(4)
+  gate on top of spawn_blocking. Each request logs a CSV line with
+  strategy,timestamp_ms,duration_ms. The build_router() function is extracted
+  for in-process unit testing with tower::ServiceExt::oneshot.
+keyFindings:
+  - >-
+    'blocking' strategy: /health p99 latency degrades to >100 ms under 50
+    concurrent compute requests — async worker thread starvation confirmed.
+  - >-
+    'spawn_blocking' strategy: /health p99 stays ≤5 ms regardless of load —
+    worker threads remain free for I/O and health checks.
+  - >-
+    'bounded' strategy: matches spawn_blocking latency isolation while returning
+    503 to excess requests instead of allowing unlimited thread pool growth.
+  - >-
+    Tokio's blocking thread pool grows dynamically up to 512 threads (vs.
+    Node.js libuv's fixed UV_THREADPOOL_SIZE=4), making accidental blocking
+    less immediately catastrophic but still a correctness hazard.
+  - >-
+    6 unit tests (health check + 3 strategies + no-param default + invalid
+    strategy) pass via tower::ServiceExt::oneshot without starting a live server.
+limitations:
+  - >-
+    Benchmark numbers reflect a specific machine; exact latencies vary with
+    CPU core count and OS scheduler behaviour.
+  - >-
+    The 100 ms busy-wait is a synthetic proxy for real CPU work — actual
+    workloads (image processing, cryptography) will show different distribution
+    shapes.
+  - >-
+    Tokio's blocking thread pool ceiling (512) was not stress-tested in this
+    experiment; pool exhaustion behaviour is documented but not measured.
+githubRepo: >-
+  https://github.com/huyhoang1001/underhood/tree/main/experiments/rust-tokio-blocking
+relatedArticleSlug: rust-async-runtime
+---

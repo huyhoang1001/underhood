@@ -1,0 +1,607 @@
+{
+  "pbtResults": {
+    "13.1 Create `test/frontmatter-roundtrip.test.ts` with `fast-check` property tests": {
+      "status": "passed",
+      "lastRunTimestamp": 1794291887373
+    }
+  },
+  "executionHistory": {
+    "1.1 Scaffold `experiments/rust-tokio-blocking/` with `Cargo.toml` and empty `src/main.rs`": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189161
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288200921
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288267746
+      }
+    ],
+    "2.1 Define response types and `AppState`": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189205
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288278131
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288323799
+      }
+    ],
+    "2.2 Implement `main()` with startup logging and router setup": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189230
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288329392
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288440512
+      }
+    ],
+    "2.3 Implement `health_handler()`": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189262
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288334471
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288445642
+      }
+    ],
+    "2.4 Implement `compute_handler()` — `blocking` strategy branch": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189308
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288339624
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288450812
+      }
+    ],
+    "2.5 Implement `compute_handler()` — `spawn_blocking` strategy branch": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189333
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288344670
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288455738
+      }
+    ],
+    "2.6 Implement `compute_handler()` — `bounded` strategy branch": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189364
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288349499
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288460815
+      }
+    ],
+    "2.7 Implement `compute_handler()` — unknown strategy branch and `run_blocking_work()`": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189389
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288354815
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288465953
+      }
+    ],
+    "2.8 Extract `build_router()` helper function for testability": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189414
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288471161
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288503880
+      }
+    ],
+    "3. Checkpoint — Compile, lint, and format the Rust project": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189439
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288521780
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288961818
+      }
+    ],
+    "4.1 Write unit tests for `health_handler` and known-good strategies": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189463
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288526729
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288992764
+      }
+    ],
+    "4.2 Write unit test for unknown strategy → 400": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189488
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288531645
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288998618
+      }
+    ],
+    "5. Checkpoint — Run the full Rust test suite": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189514
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289034377
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289234460
+      }
+    ],
+    "6.1 Write the README with prerequisites, build/run instructions, endpoint reference, benchmark commands, and expected outcomes table": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189539
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288536734
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289004436
+      }
+    ],
+    "7.1 Create `src/components/TokioArchitectureDiagram.tsx` modelled after `NodeProcessDiagram.tsx`": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189564
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288541855
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289010621
+      }
+    ],
+    "8.1 Create `src/components/TokioArchitectureDiagramIsland.astro`": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189588
+      },
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289028935
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289240249
+      }
+    ],
+    "9.1 Update `keystatic.config.ts` to register `TokioArchitectureDiagramBlock`": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189615
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289268110
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289340876
+      }
+    ],
+    "9.2 Update `src/pages/writing/[slug].astro` to import and pass `TokioArchitectureDiagramIsland`": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189639
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289273751
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289346558
+      }
+    ],
+    "10.1 Create `src/content/experiments/rust-tokio-blocking.mdx` with all required frontmatter fields": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189683
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289279798
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289352783
+      }
+    ],
+    "11.1 Write the article frontmatter": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189711
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289390042
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291021149
+      }
+    ],
+    "11.2 Write the article opening and `<TokioArchitectureDiagram />` placement": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189741
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291027489
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291263006
+      }
+    ],
+    "11.3 Write \"Does Rust Have an Event Loop?\" section": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189770
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291033242
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291270164
+      }
+    ],
+    "11.4 Write \"Part 1: Tokio's Internal Architecture\" section with Mermaid diagram": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189800
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291040087
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291276573
+      }
+    ],
+    "11.5 Write \"Part 2: Scheduler Starvation Under Load\" section": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189831
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291046070
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291283009
+      }
+    ],
+    "11.6 Write \"Part 3: spawn_blocking and the Blocking Thread Pool\" section": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189856
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291052746
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291289494
+      }
+    ],
+    "11.7 Write \"Part 4: Tokio vs. Node.js — A Precise Comparison\" section": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189883
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291058356
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291295931
+      }
+    ],
+    "11.8 Write \"Part 5: Benchmark Results\" section": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189908
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291064378
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291302401
+      }
+    ],
+    "11.9 Write \"Part 6: The Production Decision Guide\" section and conclusion": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189933
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291070129
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291308913
+      }
+    ],
+    "12. Checkpoint — Validate content schema and confirm pages render": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189958
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291322652
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291972337
+      }
+    ],
+    "13.1 Create `test/frontmatter-roundtrip.test.ts` with `fast-check` property tests": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288189986
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291328964
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291978485
+      }
+    ],
+    "14. Final checkpoint — All tests pass end to end": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288190016
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291985236
+      },
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794292120469
+      }
+    ],
+    "1. Create the Rust experiment project skeleton": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288267785
+      }
+    ],
+    "2. Implement `src/main.rs` — types, router, and all three strategies": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288503909
+      }
+    ],
+    "4. Write Rust unit and property tests in `src/main.rs`": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794288998659
+      }
+    ],
+    "6. Create `experiments/rust-tokio-blocking/README.md`": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289004465
+      }
+    ],
+    "7. Create the `TokioArchitectureDiagram` React component": [
+      {
+        "executionId": "305c35ad-c64f-4a35-b236-259a5711aae8",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289010667
+      }
+    ],
+    "8. Create the `TokioArchitectureDiagramIsland` Astro island": [
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289240306
+      }
+    ],
+    "9. Register `TokioArchitectureDiagramBlock` in Keystatic and wire the island into `[slug].astro`": [
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289346601
+      }
+    ],
+    "10. Create the experiment MDX metadata file": [
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794289352816
+      }
+    ],
+    "11. Create the article MDX file with full body content": [
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291308952
+      }
+    ],
+    "13. Write TypeScript property tests for frontmatter round-trip": [
+      {
+        "executionId": "38a8e24d-f4b9-4ea3-bb1a-db2986c58d1a",
+        "chatSessionId": "sess_e459037f-87f4-4f4a-b166-5fbff8c7437b",
+        "timestamp": 1794291978534
+      }
+    ]
+  }
+}

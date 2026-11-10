@@ -16,6 +16,11 @@ const ThreadPoolVisualizerBlock = block({
   schema: {}
 });
 
+const TokioArchitectureDiagramBlock = block({
+  label: 'Tokio Architecture Diagram',
+  schema: {}
+});
+
 export default config({
   storage: {
     kind: 'github',
@@ -71,7 +76,8 @@ export default config({
           components: {
             NodeProcessDiagram: NodeProcessDiagramBlock,
             NodeThreadpoolVisualizer: NodeThreadpoolVisualizerBlock,
-            ThreadPoolVisualizer: ThreadPoolVisualizerBlock
+            ThreadPoolVisualizer: ThreadPoolVisualizerBlock,
+            TokioArchitectureDiagram: TokioArchitectureDiagramBlock
           }
         })
       }
@@ -134,7 +140,8 @@ export default config({
           components: {
             NodeProcessDiagram: NodeProcessDiagramBlock,
             NodeThreadpoolVisualizer: NodeThreadpoolVisualizerBlock,
-            ThreadPoolVisualizer: ThreadPoolVisualizerBlock
+            ThreadPoolVisualizer: ThreadPoolVisualizerBlock,
+            TokioArchitectureDiagram: TokioArchitectureDiagramBlock
           }
         })
       }

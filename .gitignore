@@ -11,3 +11,6 @@ coverage/
 # Astro generated cache (auto-rebuilt, not source)
 .astro/content-modules.mjs
 .astro/data-store.json
+
+# Rust experiment build output
+experiments/*/target/

@@ -52,7 +52,7 @@ export interface Experiment {
   limitations: string[];
   githubRepo: string;
   relatedArticleSlug?: string;
-  interactiveType?: 'queue-backpressure' | 'grpc-multiplex' | 'cache-invalidation' | 'node-threadpool';
+  interactiveType?: 'queue-backpressure' | 'grpc-multiplex' | 'cache-invalidation' | 'node-threadpool' | 'tokio-scheduler';
 }
 
 export interface AuthorProfile {

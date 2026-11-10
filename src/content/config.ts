@@ -48,7 +48,7 @@ const experimentsCollection = defineCollection({
     limitations: z.array(z.string()).default([]),
     githubRepo: z.string().url(),
     relatedArticleSlug: z.string().optional(),
-    interactiveType: z.enum(['node-threadpool', 'queue-backpressure', 'grpc-multiplex', 'cache-invalidation']).optional()
+    interactiveType: z.enum(['node-threadpool', 'queue-backpressure', 'grpc-multiplex', 'cache-invalidation', 'tokio-scheduler']).optional()
   })
 });
 

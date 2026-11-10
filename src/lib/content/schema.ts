@@ -56,7 +56,7 @@ export const ExperimentFrontmatterSchema = z.object({
   limitations: z.array(z.string()).default([]),
   githubRepo: z.string().url('Must be a valid repository URL'),
   relatedArticleSlug: z.string().optional(),
-  interactiveType: z.enum(['node-threadpool', 'queue-backpressure', 'grpc-multiplex', 'cache-invalidation']).optional()
+  interactiveType: z.enum(['node-threadpool', 'queue-backpressure', 'grpc-multiplex', 'cache-invalidation', 'tokio-scheduler']).optional()
 });
 
 export type ExperimentFrontmatter = z.infer<typeof ExperimentFrontmatterSchema>;

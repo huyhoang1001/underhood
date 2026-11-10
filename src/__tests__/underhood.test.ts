@@ -101,7 +101,7 @@ describe('Draft Isolation & Query Policies', () => {
 
   it('loads nodejs-threadpool experiment with draft isolation', () => {
     const prodExp = getExperimentBySlug('nodejs-threadpool', { includeDrafts: false });
-    expect(prodExp).toBeUndefined();
+    expect(prodExp).toBeDefined(); // published, so visible in production
 
     const devExp = getExperimentBySlug('nodejs-threadpool', { includeDrafts: true });
     expect(devExp).toBeDefined();

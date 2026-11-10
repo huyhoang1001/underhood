@@ -333,7 +333,100 @@ sequenceDiagram
 
 ---
 
-## Part 6: The production decision guide
+
+## Part 6: When spawn_blocking isn't enough — rayon and true parallelism
+
+`spawn_blocking` solves the problem we measured: it moves a blocking task off the worker thread so other async tasks can run. But it only runs one closure at a time, on one thread.
+
+What if the work itself is the bottleneck — not the blocking, but the sheer amount of computation?
+
+Imagine you're resizing a 50-megapixel image. `spawn_blocking` would move that work off the async thread, which is good. But it would still run on a single thread from start to finish. All those pixels are processed sequentially, one after another.
+
+If you have 8 cores available and the image can be divided into chunks, you're leaving 7 cores idle.
+
+That's the problem `rayon` solves. Rayon is a parallel computation library that takes a piece of work, splits it across all available CPU cores, and joins the results when everything finishes. It's not part of the async runtime — it's a completely separate thread pool, designed specifically for divide-and-conquer CPU work.
+
+### A concrete example: processing a large collection
+
+Say you receive a batch of 10,000 records and need to hash each one. The sequential version:
+
+```rust
+// processes one record at a time — ignores 7 out of 8 cores
+let hashes: Vec<String> = records
+    .iter()
+    .map(|r| compute_hash(r))
+    .collect();
+```
+
+The parallel version with rayon:
+
+```rust
+use rayon::prelude::*;
+
+// automatically splits the work across all CPU cores
+let hashes: Vec<String> = records
+    .par_iter()         // parallel iterator — this is the only change
+    .map(|r| compute_hash(r))
+    .collect();
+```
+
+That's it. `.par_iter()` replaces `.iter()`. Rayon handles splitting the slice, scheduling chunks across the thread pool, and collecting the results. On an 8-core machine, you get roughly 8x the throughput for embarrassingly parallel work like this.
+
+### How rayon fits with Tokio
+
+Rayon and Tokio don't conflict — they just each own their own thread pool.
+
+The typical pattern when combining them: receive a request on a Tokio worker thread, hand the CPU-heavy work to rayon via `spawn_blocking`, and await the result:
+
+```rust
+axum::handler!(|payload: Bytes| async move {
+    let result = tokio::task::spawn_blocking(move || {
+        // inside here, rayon can use all cores
+        payload
+            .par_chunks(CHUNK_SIZE)
+            .map(|chunk| compress_chunk(chunk))
+            .collect::<Vec<_>>()
+    })
+    .await?;
+
+    Ok(Json(result))
+})
+```
+
+The `spawn_blocking` keeps the Tokio worker thread free. Rayon does the parallel work on its own pool. Neither runtime knows about the other — they just coexist.
+
+### When to use rayon vs spawn_blocking
+
+The distinction comes down to one question: **is the work already parallelisable?**
+
+| Situation | Use |
+|---|---|
+| One blocking operation (password hash, file read, legacy API call) | `spawn_blocking` |
+| A collection you can process independently in chunks | `rayon::par_iter()` |
+| Image processing, video encoding, compression | `rayon` or a dedicated worker thread |
+| Embedding generation, model inference | Dedicated thread(s) with `std::thread::spawn` |
+| Anything mixing parallel CPU work + async results | `spawn_blocking` wrapping rayon |
+
+The rule of thumb: if you're calling `.iter().map(expensive_fn).collect()` and the function is pure (no I/O, no shared mutable state), replace `.iter()` with `.par_iter()` and you're done. If you have one big blocking operation with no natural subdivision, `spawn_blocking` is the right tool.
+
+### What about spawning OS threads directly?
+
+`std::thread::spawn` is an option when you need a long-lived thread with its own lifecycle — a background worker that runs continuously, reads from a channel, and processes items one by one. It's not a task scheduler like Tokio or a parallel computation framework like rayon. It's just an OS thread you manage yourself.
+
+```rust
+// background processing thread — runs for the lifetime of the application
+let (tx, rx) = std::sync::mpsc::channel::<WorkItem>();
+
+std::thread::spawn(move || {
+    for item in rx {
+        process(item);  // runs on its own dedicated thread
+    }
+});
+```
+
+This pattern makes sense for things like a background indexer, a metrics flusher, or a queue consumer that shouldn't be tied to the request lifecycle. For one-off parallel computation, rayon is simpler. For occasional blocking operations, `spawn_blocking` is simpler. Direct `std::thread` is for when you need explicit control over the thread's lifetime.
+
+## Part 7: The production decision guide
 
 When you're writing an async Rust handler and need to decide how to handle some work:
 

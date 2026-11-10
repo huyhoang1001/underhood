@@ -53,6 +53,7 @@ const relatedArticles = allArticles
   readingTime={readingTimeInfo.formattedReadingTime}
   wordCount={readingTimeInfo.wordCount}
   githubUrl={article.data.githubUrl}
+  experimentSlug={article.data.relatedExperiments?.[0]}
   isDraft={article.data.status === 'draft'}
   toc={toc}
   relatedArticles={relatedArticles}

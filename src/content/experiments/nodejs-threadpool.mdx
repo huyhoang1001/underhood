@@ -50,13 +50,3 @@ githubRepo: >-
 relatedArticleSlug: nodejs-single-threaded
 interactiveType: node-threadpool
 ---
-## Overview
-
-This experiment evaluates the runtime boundaries of the libuv worker thread pool and the main-thread Event Loop in Node.js.
-
-When developers hear that Node.js is "non-blocking", they frequently assume that all asynchronous operations run in parallel across CPU cores. This investigation proves:
-
-1. Asynchronous C++ operations like `crypto.pbkdf2()` are constrained by a fixed 4-worker thread pool.
-2. Increasing `UV_THREADPOOL_SIZE` beyond physical core count induces CPU time-slicing contention rather than linear speedup.
-3. Synchronous JavaScript execution locks the entire Event Loop, preventing concurrent HTTP requests from resolving.
-4. `node:worker_threads` isolates CPU execution onto dedicated V8 isolates, maintaining sub-millisecond Event Loop responsiveness.

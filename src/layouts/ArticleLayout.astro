@@ -13,6 +13,7 @@ interface Props {
   readingTime?: string;
   wordCount?: number;
   githubUrl?: string;
+  experimentSlug?: string;
   isDraft?: boolean;
   toc?: Array<{ id: string; title: string; level: number }>;
   relatedArticles?: Array<{ slug: string; title: string; readingTime: string }>;
@@ -27,6 +28,7 @@ const {
   readingTime = "5 min read",
   wordCount = 1000,
   githubUrl,
+  experimentSlug,
   isDraft = false,
   toc = [],
   relatedArticles = []
@@ -109,7 +111,17 @@ const {
         </div>
 
         <div class="flex items-center gap-2">
-          {githubUrl && (
+          {experimentSlug && (
+            <a
+              href={`/experiments/${experimentSlug}`}
+              class="flex items-center gap-1.5 px-2.5 py-1 text-xs text-[#78716c] dark:text-[#8b949e] hover:text-[#1c1917] dark:hover:text-[#f0f6fc] bg-[#f2ede4] dark:bg-[#161b22] border border-[#e7e3da] dark:border-[#30363d] rounded transition-colors"
+              title="View reproducible experiment data and interactive simulation"
+            >
+              <Github class="w-3.5 h-3.5" />
+              <span class="hidden sm:inline">Repro Harness</span>
+            </a>
+          )}
+          {!experimentSlug && githubUrl && (
             <a
               href={githubUrl}
               target="_blank"

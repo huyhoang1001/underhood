@@ -52,7 +52,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items }) => {
   if (!items || items.length === 0) return null;
 
   return (
-    <nav className="text-xs space-y-2 sticky top-24" aria-label="Table of contents">
+    <nav className="text-xs space-y-2" aria-label="Table of contents">
       <div className="flex items-center gap-1.5 font-semibold text-[#1c1917] dark:text-[#f0f6fc] tracking-wider uppercase text-[11px] mb-3 pb-2 border-b border-[#e7e3da] dark:border-[#30363d]">
         <AlignLeft className="w-3.5 h-3.5 text-sky-500" />
         <span>Contents</span>

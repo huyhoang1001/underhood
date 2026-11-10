@@ -147,7 +147,8 @@ const {
       </main>
 
       <!-- Right Sidebar: Table of Contents & Related Investigations (4 cols) -->
-      <aside class="hidden lg:block lg:col-span-4 space-y-10 pl-4">
+      <aside class="hidden lg:block lg:col-span-4 pl-4">
+        <div class="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto space-y-6 pr-1 scrollbar-thin">
         {toc.length > 0 && <TableOfContents client:visible items={toc} />}
 
         {relatedArticles.length > 0 && (
@@ -172,6 +173,7 @@ const {
             </div>
           </div>
         )}
+        </div>
       </aside>
     </div>
   </div>

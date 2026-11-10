@@ -1,0 +1,35 @@
+---
+// Custom MDX <pre> component.
+// Intercepts ```mermaid fenced code blocks and renders them via MermaidDiagram.
+// All other <pre> blocks pass through as normal.
+
+import MermaidDiagramIsland from './MermaidDiagramIsland.astro';
+
+// Astro MDX passes the raw children; we inspect the slot content via props
+// The code element's class ends up as a prop on the slot HTML string.
+// Instead, we use the standard MDX pattern: check if any child has language-mermaid.
+
+const html = await Astro.slots.render('default');
+const isMermaid = html.includes('language-mermaid');
+
+// Extract the chart text from the rendered HTML if it's a mermaid block
+let chart = '';
+if (isMermaid) {
+  // Strip the wrapping <code class="language-mermaid">...</code> tags and decode HTML entities
+  const match = html.match(/<code[^>]*class="language-mermaid"[^>]*>([\s\S]*?)<\/code>/);
+  if (match) {
+    chart = match[1]
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .trim();
+  }
+}
+---
+
+{isMermaid && chart
+  ? <MermaidDiagramIsland chart={chart} />
+  : <pre><slot /></pre>
+}

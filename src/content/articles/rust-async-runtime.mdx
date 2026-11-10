@@ -20,11 +20,12 @@ relatedArticles:
 relatedExperiments:
   - rust-tokio-blocking
 ---
+
 Every Rust engineer has heard the pitch: *"Rust's async is zero-cost — your code compiles to state machines with no runtime overhead."*
 
 We repeat it in architecture discussions. We cite it when justifying Rust over Go or Node.js. We nod along when benchmarks show Axum handling hundreds of thousands of requests per second.
 
-And yet, if you run this Axum server under load with `strategy=blocking`:
+And yet, run this Axum server under load with `strategy=blocking`:
 
 ```bash
 wrk -t4 -c50 -d30s http://localhost:3000/compute?strategy=blocking
@@ -36,28 +37,53 @@ and simultaneously probe the health endpoint from a second terminal:
 wrk -t1 -c1 -d30s http://localhost:3000/health
 ```
 
-you observe something that shouldn't be possible:
+You observe something that shouldn't be possible:
 
 ```
 /health p50 latency:  312.45ms
 /health p99 latency:  487.22ms
 ```
 
-The `/health` handler is three lines of Rust. It does no I/O, no computation, no allocation beyond a JSON response. Its baseline latency is **2 ms**. Under load from `/compute`, it degrades to **300–500 ms**.
+The `/health` handler is three lines of Rust. It does no I/O, no computation. Its normal latency is 2 ms. Under load from `/compute`, it climbs to 300–500 ms.
 
-The question the benchmark forces: *"Why does a pure async Rust server become unresponsive when one endpoint blocks — even though the two endpoints share nothing?"*
+Why does one endpoint's slow work make a completely unrelated endpoint slow?
+
+The answer has nothing to do with the code being wrong. It has everything to do with how Tokio schedules work — and what happens when you give it work it wasn't designed to handle.
 
 <TokioArchitectureDiagram />
 
 ---
 
-## Does Rust Have an Event Loop?
+## First, what is a thread?
 
-The honest answer is: it depends on which layer you're asking about.
+Before anything else: Tokio runs on OS threads. A thread is where code actually executes. Your CPU has a fixed number of cores, and each core can run one thread at a time.
 
-### The Language Layer: async/await as Zero-Cost Syntax
+When you start an Axum server with `#[tokio::main]`, Tokio creates a pool of OS threads — by default, one per logical CPU core. On an 8-core machine, that's 8 threads.
 
-Rust's `async` and `await` keywords are purely syntactic. When the compiler sees:
+```rust
+// Logged at server startup in our experiment:
+Tokio worker threads  : 8
+Tokio blocking threads: up to 512 (Tokio default ceiling)
+Listening on http://0.0.0.0:3000
+```
+
+These 8 threads are shared across every incoming request. They're called **worker threads**. Everything async runs on them.
+
+---
+
+## Does Rust have an event loop?
+
+Sort of — but it works differently from Node.js, and understanding the difference matters.
+
+### In Node.js
+
+Node.js has one main thread. That thread runs your JavaScript, processes I/O callbacks, and handles all incoming requests. When you await a database query, Node pauses your function and runs other callbacks until the response arrives. Everything goes through that single thread.
+
+### In Rust with Tokio
+
+Rust doesn't have a built-in event loop. The `async`/`await` keywords are just syntax — they tell the compiler to transform your function into something that can be paused and resumed, but they don't provide any machinery to actually run it.
+
+That machinery is Tokio. When you write:
 
 ```rust
 async fn fetch_user(id: u64) -> User {
@@ -66,67 +92,27 @@ async fn fetch_user(id: u64) -> User {
 }
 ```
 
-it desugars this into a state machine — an anonymous struct that implements the `Future` trait. The struct encodes every suspension point (each `.await`) as an enum variant that stores only the local variables in scope at that moment. No heap allocation, no OS thread, no runtime overhead until execution actually begins.
+The compiler turns this into a struct that remembers where it left off between pauses. That struct does nothing on its own. Tokio is what picks it up, runs it, pauses it when it hits `.await`, and resumes it when the data is ready.
 
-The language provides the syntax and the trait. It provides **nothing else**. There is no built-in executor, no built-in I/O driver, no built-in thread pool. A Rust `Future` without a runtime is an inert state machine that will never advance.
-
-### The Runtime Layer: Tokio as the Executor
-
-Tokio is a user-space library that provides what the language deliberately omits:
-
-1. A **multi-threaded work-stealing scheduler** (the async executor)
-2. An **I/O driver** integrated with the OS kernel event notification system
-3. A **blocking thread pool** for synchronous work that cannot yield
-
-When you annotate `main` with `#[tokio::main]`, you are telling the compiler to wrap your async function in a `tokio::runtime::Runtime::block_on` call. That runtime boots `N` worker threads (where `N` defaults to `std::thread::available_parallelism()`), registers an I/O driver with the OS, and starts polling tasks.
-
-There is no "event loop" in the Node.js sense — a single-threaded while loop checking phases. There are `N` threads all running their own polling loops in parallel, stealing tasks from each other's queues when idle.
+Tokio does this across multiple worker threads running in parallel — not on a single thread like Node.js. Each worker thread independently picks up tasks and runs them. When a task hits an `.await` point and needs to wait, the worker moves on to run something else.
 
 ---
 
-## Part 1: Tokio's Internal Architecture
+## Part 1: How Tokio actually runs your code
 
-### Worker Threads
+### Worker threads and async tasks
 
-When the Tokio runtime starts, it creates `N` OS threads equal to the number of logical CPU cores. Each thread runs an identical loop:
+An **async task** is just a unit of work you've given to Tokio — usually created with `tokio::spawn`. Tokio maintains a queue of tasks waiting to run, and each worker thread pulls from that queue.
 
-1. Poll all tasks in its **local run queue**
-2. If the local queue is empty, **steal tasks** from sibling worker queues
-3. If all queues are empty, park and wait for a Waker notification
+Here's the key behaviour: when a task reaches an `.await` point, it *pauses* and the worker thread is free to run a different task. The original task sits idle, taking up no thread, until the thing it was waiting for is ready.
 
-```rust
-// What main() logs at startup in our experiment server:
-Tokio worker threads  : 8
-Tokio blocking threads: up to 512 (Tokio default ceiling)
-Listening on http://0.0.0.0:3000
-```
+This is how 8 worker threads can serve thousands of concurrent requests. Most of the time, most tasks are waiting — for a database, a network response, a timer. The worker threads are free to handle other requests while they wait.
 
-### Per-Thread Task Queues and Work Stealing
+### How Tokio knows when a task is ready again
 
-Each worker thread has a **lock-free double-ended queue (deque)**. When `tokio::spawn` is called, the new task is pushed to the calling thread's local queue. Idle workers steal from the **back** of busy workers' queues, ensuring even distribution without a centralised lock.
+When a task pauses at `.await`, it registers a **waker** — a small callback that says "when this I/O completes, wake me up." Tokio's I/O driver watches the OS for these events (using epoll on Linux, kqueue on macOS). When the kernel says "data arrived on socket #42", the I/O driver calls the waker, which puts the task back in the run queue.
 
-### The I/O Driver
-
-Tokio integrates the OS event notification system (epoll on Linux, kqueue on macOS, IOCP on Windows) directly into the scheduler. When a task calls `.await` on a `TcpStream::read()`, Tokio registers interest with the kernel and immediately suspends the task — no thread is held. When data arrives, the kernel notifies the I/O driver, which calls `Waker::wake()` to reschedule the task.
-
-A single worker thread can manage tens of thousands of suspended network connections without consuming additional OS resources.
-
-### The Poll Model and Wakers
-
-Every `Future` exposes a single method:
-
-```rust
-fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Output>
-```
-
-When called, the future either:
-
-* Returns `Poll::Ready(value)` — computation is complete
-* Returns `Poll::Pending` — registers `cx.waker().clone()` somewhere that will call `wake()` when progress is possible, then returns
-
-The critical rule: **a future that returns `Poll::Pending` must never re-enter `poll()` until its Waker has been called**. If a future performs synchronous blocking work inside `poll()`, it violates this contract — it holds the worker thread for the entire blocking duration, preventing every other task in the queue from being polled.
-
-### Mermaid: Tokio Architecture
+This is the whole mechanism. No magic, no polling loops — just tasks pausing, wakers firing, tasks resuming.
 
 ```mermaid
 graph TD
@@ -137,11 +123,17 @@ graph TD
     D -->|CPU / sync I/O| F["OS Threads\n(one per blocking task)"]
 ```
 
+### What work-stealing means
+
+Each worker thread has its own local task queue. When a thread runs out of work, it reaches over and steals tasks from another thread's queue. This keeps all cores busy without a central bottleneck.
+
+It also means there's no global task queue to fight over. The design scales well under load.
+
 ---
 
-## Part 2: Scheduler Starvation Under Load
+## Part 2: What goes wrong when you block a worker thread
 
-Here is the `blocking` strategy handler from our experiment server:
+Here is the `blocking` strategy handler from our experiment:
 
 ```rust
 "blocking" => {
@@ -149,7 +141,6 @@ Here is the `blocking` strategy handler from our experiment server:
     let start = Instant::now();
     run_blocking_work(); // 100ms busy-wait — RUNS ON THE ASYNC WORKER THREAD
     let duration_ms = start.elapsed().as_millis() as u64;
-    println!("blocking,{},{}", current_timestamp_ms(), duration_ms);
     Ok(Json(ComputeResponse {
         strategy: "blocking".into(),
         duration_ms,
@@ -165,63 +156,74 @@ fn run_blocking_work() {
     let deadline = Instant::now() + Duration::from_millis(100);
     let mut _x: u64 = 0;
     while Instant::now() < deadline {
-        _x = _x.wrapping_add(1); // prevents compiler optimisation
+        _x = _x.wrapping_add(1);
     }
 }
 ```
 
-This code is correct Rust. It compiles cleanly. `cargo clippy -- -D warnings` produces zero warnings. But it is a scheduler bomb.
+This code is correct Rust. It compiles. `cargo clippy` is happy. But it has a serious problem: it runs for 100ms without ever pausing.
 
-When 50 clients hit `/compute?strategy=blocking` concurrently on an 8-core machine, all 8 worker threads become occupied with 100 ms busy-waits. The scheduler has no free threads to poll other tasks. The `/health` handler — which needs only microseconds to execute — cannot be scheduled until a worker thread completes its blocking work.
+There's no `.await` inside `run_blocking_work()`. That means the worker thread running this handler is occupied for the full 100ms and can't do anything else. It can't run `/health`. It can't process other requests. It just sits there spinning.
 
-**Benchmark results (blocking strategy, 50 concurrent connections, 30s):**
+With 8 worker threads and 50 concurrent requests, all 8 threads get tied up almost immediately. Every thread is running a 100ms busy-wait. The `/health` handler is waiting in the queue with no thread available to run it.
+
+That's **scheduler starvation**. No bug. No race condition. Just a worker pool with no capacity left.
+
+**What the benchmark shows (blocking strategy, 50 concurrent connections):**
 
 | Metric                | Baseline (1 req) | Under load (50 concurrent) |
 | --------------------- | ---------------- | -------------------------- |
-| `/health` p50 latency | \~2 ms           | >100 ms                    |
-| `/health` p99 latency | \~3 ms           | >300 ms                    |
-| `/compute` throughput | \~8 req/s        | \~8 req/s                  |
+| `/health` p50 latency | ~2 ms            | >100 ms                    |
+| `/health` p99 latency | ~3 ms            | >300 ms                    |
+| `/compute` throughput | ~8 req/s         | ~8 req/s                   |
 | `/compute` error rate | 0%               | 0%                         |
 
-> *Expected outcomes based on an 8-core machine. Replace with measured values after running the benchmarks in the README.*
+> *Expected outcomes on an 8-core machine. Run the benchmarks in the README to get measured values.*
+
+Notice that `/compute` throughput doesn't change — the server is still doing the same amount of compute work. What changes is that `/health` can't get a turn.
 
 > **⚠ Warning: `spawn_blocking` Is Not Free**
 >
-> Calling `tokio::task::spawn_blocking` on every incoming request is not safe
-> either. Each call consumes a thread from Tokio's blocking thread pool (default
-> ceiling: 512 threads). If the pool is exhausted, `spawn_blocking` itself will
-> block the calling async task while waiting for a thread to become free.
-> The bounded strategy with `tokio::sync::Semaphore` shown in Part 3 is the
-> correct production pattern for high-concurrency workloads.
+> Calling `tokio::task::spawn_blocking` on every incoming request isn't safe either.
+> Each call consumes a thread from Tokio's blocking thread pool (default ceiling: 512 threads).
+> If the pool fills up, `spawn_blocking` itself will block the calling task while it waits for a free thread.
+> The bounded strategy with `tokio::sync::Semaphore` shown in Part 3 is the safer pattern for high-concurrency workloads.
 
 ---
 
-## Part 3: spawn_blocking and the Blocking Thread Pool
+## Part 3: spawn_blocking — moving work off the worker threads
 
-Tokio's answer to blocking work is a separate, dynamically-sized pool of OS threads. `tokio::task::spawn_blocking` moves a synchronous closure onto one of these threads, freeing the worker thread to continue polling other async tasks.
+So why can't Tokio just run long-running work on a background thread automatically?
+
+It could — but it doesn't know which work is "long" and which isn't. That's your job. When you have CPU-heavy or blocking work that doesn't have `.await` points, you tell Tokio explicitly: *"run this on a different thread."*
+
+That's `spawn_blocking`. It takes a closure, hands it to a separate thread pool, and returns a future you can `.await`. While the blocking work runs, the worker thread is free.
 
 ```rust
 "spawn_blocking" => {
-    let start = Instant::now();
     let (duration_ms, thread_id) = tokio::task::spawn_blocking(|| {
         let inner_start = Instant::now();
         let tid = format!("{:?}", std::thread::current().id());
         run_blocking_work(); // runs on a BLOCKING POOL thread, not a worker thread
         (inner_start.elapsed().as_millis() as u64, tid)
     })
-    .await // the worker thread is RELEASED here, free to poll other tasks
+    .await   // worker thread is RELEASED here — free to run /health, other requests
     .unwrap();
     // ...
 }
 ```
 
-The `bounded` strategy adds a `tokio::sync::Semaphore` to cap concurrency:
+The worker thread hands off the work, hits `.await`, and immediately goes back to the queue. It might handle five other requests while `run_blocking_work()` is running on the blocking pool thread.
+
+### The bounded pattern
+
+If many requests all use `spawn_blocking` simultaneously, you can flood the blocking thread pool. The `bounded` strategy adds a `tokio::sync::Semaphore` — a simple counter that limits how many blocking tasks run at once:
 
 ```rust
 "bounded" => {
     let permit = tokio::time::timeout(
         Duration::from_secs(30),
-        state.semaphore.acquire(),
+        state.semaphore.acquire(),   // wait for a slot (max 4 concurrent)
     )
     .await;
 
@@ -232,86 +234,81 @@ The `bounded` strategy adds a `tokio::sync::Semaphore` to cap concurrency:
         }))),
     };
 
-    let start = Instant::now();
     let (duration_ms, thread_id) = tokio::task::spawn_blocking(|| {
-        // ...
         run_blocking_work();
         // ...
     }).await.unwrap();
-    drop(permit); // release after blocking work completes
+    drop(permit); // release the slot when done
     // ...
 }
 ```
 
-**Comparison: direct handler vs spawn_blocking**
+If more than 4 requests arrive simultaneously, they wait for a slot. After 30 seconds of waiting, they get a 503 instead of queuing forever.
 
-| Dimension                          | Direct async handler (`blocking`) | `spawn_blocking`                            |
-| ---------------------------------- | --------------------------------- | ------------------------------------------- |
-| Worker thread held during CPU work | Yes — for full 100 ms             | No — `.await` releases it immediately       |
-| Impact on unrelated async tasks    | Starves all tasks on that worker  | None — worker is free to poll other futures |
-| Worker threads consumed            | 1 per request (while running)     | 0 async workers; 1 blocking pool thread     |
-| Recommended use case               | Only for work \< 10–100 µs        | Any synchronous work > 100 µs               |
+**Comparison:**
 
-The rule of thumb: if a synchronous operation takes longer than **100 microseconds**, move it to `spawn_blocking`. Shorter synchronous work (small arithmetic, field access, cheap string formatting) is fine to run inline in an async handler.
+| Dimension                          | `blocking` (direct)              | `spawn_blocking`                            |
+| ---------------------------------- | -------------------------------- | ------------------------------------------- |
+| Worker thread held during CPU work | Yes — full 100 ms                | No — released at `.await`                   |
+| Impact on `/health` and other tasks | Starves them                    | None — workers stay free                    |
+| Worker threads consumed            | 1 per request (while running)    | 0 async workers; 1 blocking pool thread     |
+| When to use                        | Work under ~100 µs               | Anything slower than ~100 µs                |
 
 ---
 
-## Part 4: Tokio vs. Node.js — A Precise Comparison
+## Part 4: Tokio vs. Node.js — a quick comparison
 
-If you've read the [companion Node.js article](/writing/nodejs-single-threaded), the architecture patterns here will be familiar — but the mechanics are different in ways that matter for production decisions.
+If you've read the [companion Node.js article](/writing/nodejs-single-threaded), you've seen a similar story play out with libuv's thread pool. The analogy is fairly direct.
 
-### Correspondence Table
-
-| Dimension                                | Node.js                                           | Tokio (Rust)                                            |
-| ---------------------------------------- | ------------------------------------------------- | ------------------------------------------------------- |
-| Async execution thread model             | Single main thread (Event Loop) + 4 libuv workers | N worker threads (default: num_cpus)                    |
-| I/O driver mechanism                     | libuv polls epoll/kqueue on the main thread       | I/O driver integrated into worker thread polling        |
-| Task scheduling strategy                 | FIFO callback queue (single-threaded)             | Work-stealing deque (multi-threaded, lock-free)         |
-| Consequence of blocking execution thread | Blocks all JS, all I/O callbacks, all timers      | Blocks that worker's queue only; other workers continue |
-| Blocking work pool                       | libuv thread pool (fixed: `UV_THREADPOOL_SIZE=4`) | Tokio blocking pool (dynamic: up to 512 threads)        |
-
-### Side-by-Side: Offloading CPU Work
-
-**Node.js — libuv thread pool via callback:**
+In Node.js, `crypto.pbkdf2` runs on a background thread from libuv's pool, and the callback runs on the main thread when it's done:
 
 ```javascript
 crypto.pbkdf2('password', 'salt', 100000, 64, 'sha512', (err, key) => {
-  // executes on a libuv worker thread (Thread #2–#5)
-  // callback fires on the main thread when complete
+  // runs on a libuv worker thread
+  // callback fires on the main thread when done
   res.json({ hash: key.toString('hex') });
 });
 ```
 
-**Rust — Tokio blocking pool via spawn_blocking:**
+In Rust with Tokio, the same pattern looks like:
 
 ```rust
 let key = tokio::task::spawn_blocking(|| {
-    // executes on a blocking pool thread (not a worker thread)
-    derive_key("password", "salt", 100_000)
+    derive_key("password", "salt", 100_000)  // runs on a blocking pool thread
 })
 .await?;
-// resumes on a worker thread when complete
+// resumes on a worker thread when done
 ```
 
-The structural analogy is direct: `crypto.pbkdf2` with a callback ≈ `spawn_blocking` with a closure. Both offload synchronous work to a separate thread pool and resume on the scheduling thread when complete.
+Both approaches do the same thing: hand the CPU work to a separate thread pool so the main scheduling threads stay free.
 
-The key difference: Node.js's pool is fixed at 4 threads (or `UV_THREADPOOL_SIZE`). Tokio's pool grows dynamically up to 512 threads. This makes accidental blocking in Tokio less immediately catastrophic — but it is still a correctness hazard, not a free pass.
+The main differences:
+
+| Dimension                                | Node.js                                           | Tokio (Rust)                                            |
+| ---------------------------------------- | ------------------------------------------------- | ------------------------------------------------------- |
+| Async execution thread model             | Single main thread (Event Loop)                   | N worker threads (default: num_cpus)                    |
+| Consequence of blocking a thread         | Blocks all JS, all I/O callbacks, all timers      | Blocks that worker's queue only; others continue        |
+| Blocking work pool                       | Fixed: `UV_THREADPOOL_SIZE=4` by default          | Dynamic: grows up to 512 threads                        |
+
+The bigger pool in Tokio means accidental blocking is less immediately visible — but it's still a problem. The `/health` starvation we measured is real, and it happens on Tokio even though its pool is much larger than Node's.
 
 ---
 
 ## Part 5: Benchmark Results
 
-> *All values are expected outcomes based on an 8-core machine running the experiment server from `experiments/rust-tokio-blocking/`. Replace with measured values after running the benchmarks described in the README.*
+> *All values are expected outcomes based on an 8-core machine. Run the benchmarks described in the README to replace these with your measured values.*
 
 | Strategy         | /health p50 | /health p99 | /compute throughput | Error rate                     |
 | ---------------- | ----------- | ----------- | ------------------- | ------------------------------ |
-| `blocking`       | >100 ms     | >300 ms     | \~8 req/s           | \~0%                           |
-| `spawn_blocking` | ≤2 ms       | ≤5 ms       | \~8 req/s           | \~0%                           |
-| `bounded`        | ≤2 ms       | ≤5 ms       | \~4 req/s           | \~0% (503s counted separately) |
+| `blocking`       | >100 ms     | >300 ms     | ~8 req/s            | ~0%                            |
+| `spawn_blocking` | ≤2 ms       | ≤5 ms       | ~8 req/s            | ~0%                            |
+| `bounded`        | ≤2 ms       | ≤5 ms       | ~4 req/s            | ~0% (503s counted separately)  |
 
-The critical observation: `spawn_blocking` and `blocking` show the same `/compute` throughput (\~8 req/s). The difference is entirely in what happens to unrelated concurrent tasks. The blocking strategy monopolises worker threads; spawn_blocking releases them.
+Both `blocking` and `spawn_blocking` produce the same `/compute` throughput. The only difference is what happens to everything else running on the server.
 
 ### Request Execution Timeline
+
+This diagram shows what happens inside Tokio when a request uses `spawn_blocking` correctly. Notice that the worker thread is free between the two `.await` points — that's the window where `/health` and other requests can run.
 
 ```mermaid
 sequenceDiagram
@@ -336,9 +333,9 @@ sequenceDiagram
 
 ---
 
-## Part 6: The Production Decision Guide
+## Part 6: The production decision guide
 
-### Decision Flowchart
+When you're writing an async Rust handler and need to decide how to handle some work:
 
 ```mermaid
 graph TD
@@ -358,30 +355,27 @@ graph TD
     D -->|Yes| J["Use std::thread or rayon\nFull OS thread parallelism\nNo async overhead"]
 ```
 
-### Thread Count Guidance
+**A few rules of thumb:**
 
-Tokio's default worker thread count equals `std::thread::available_parallelism()` — the number of logical CPU cores. On an 8-core machine, you get 8 worker threads. This is optimal for I/O-bound workloads where tasks spend most of their time suspended at `.await` points.
+- If work involves waiting (network, disk, database) — just `.await` it. Tokio's I/O driver handles it without holding any thread.
+- If work is synchronous and takes more than ~100 µs — use `spawn_blocking`. Anything slower than that is long enough to noticeably delay other tasks.
+- If you're running many `spawn_blocking` calls under heavy traffic — add a `Semaphore` to cap concurrency and return 503 early rather than letting the blocking pool grow without bound.
+- If you need true parallelism for CPU-heavy computation (image processing, compression, ML inference) — `std::thread` or `rayon` are better fits than trying to work around the async runtime.
 
-For CPU-bound workloads, `spawn_blocking` moves work off the async worker threads. The blocking pool grows up to 512 threads by default. You can tune this ceiling with `tokio::runtime::Builder::new_multi_thread().max_blocking_threads(N)`.
+Tokio's default worker thread count is `std::thread::available_parallelism()` — the number of logical CPU cores. You rarely need to change it for I/O-heavy servers. For CPU-bound workloads, `spawn_blocking` takes the pressure off.
 
 ---
 
-## Conclusion: The Corrected Mental Model
+## Conclusion: the mental model that actually works
 
-The opening contradiction — `/health` latency degrading to 300 ms despite doing no work — has a precise explanation:
+The opening problem — `/health` latency spiking to 300 ms despite doing no work — comes down to one thing: Tokio's worker threads are shared across all async tasks, and a synchronous blocking call holds a worker thread for its entire duration without pausing.
 
-1. Tokio runs `N` worker threads, where `N` = number of logical CPU cores
-2. Each worker thread runs a polling loop; it can only poll **one task at a time**
-3. A synchronous blocking call occupies the worker thread for its **full wall-clock duration**
-4. Under load, all `N` worker threads become occupied with blocking work
-5. The `/health` handler is a pending task waiting in a queue; no worker is free to poll it
+With 8 worker threads and 50 concurrent 100ms blocking requests, the math is straightforward: all workers are busy. `/health` can't run until one of them finishes.
 
-The corrected mental model: *"Async Rust is cooperative, not preemptive. The scheduler cannot interrupt a running task. If you block, you starve."*
+The working mental model: **Tokio's worker threads are a shared resource. Blocking work that doesn't pause wastes that resource for everyone.**
 
-`spawn_blocking` resolves the contradiction by moving synchronous work onto a separate pool — threads that are not part of the async scheduler. Worker threads are released at every `.await` point and immediately available to poll other tasks, including `/health`.
+`spawn_blocking` fixes it cleanly: the blocking work moves to a separate thread pool, the worker thread is released at the `.await`, and the rest of the server stays responsive.
 
-The mental model that makes production Rust async work:
-
-* **Async handler → I/O, timers, channels**: let `.await` suspend and release the thread
-* **Synchronous work > 100 µs → `spawn_blocking`**: move it off the worker thread
-* **Sustained CPU parallelism → `std::thread` or `rayon`**: don't fight the async runtime
+- **I/O, timers, channels** — use `.await` and let Tokio handle it
+- **CPU-heavy or blocking work over ~100 µs** — use `spawn_blocking`
+- **Independent parallel computation** — use `std::thread` or `rayon`

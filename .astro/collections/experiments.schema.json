@@ -88,7 +88,8 @@
             "node-threadpool",
             "queue-backpressure",
             "grpc-multiplex",
-            "cache-invalidation"
+            "cache-invalidation",
+            "tokio-scheduler"
           ]
         },
         "$schema": {

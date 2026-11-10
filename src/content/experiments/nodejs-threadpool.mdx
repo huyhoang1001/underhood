@@ -60,5 +60,3 @@ When developers hear that Node.js is "non-blocking", they frequently assume that
 2. Increasing `UV_THREADPOOL_SIZE` beyond physical core count induces CPU time-slicing contention rather than linear speedup.
 3. Synchronous JavaScript execution locks the entire Event Loop, preventing concurrent HTTP requests from resolving.
 4. `node:worker_threads` isolates CPU execution onto dedicated V8 isolates, maintaining sub-millisecond Event Loop responsiveness.
-
-<ThreadPoolVisualizer />

@@ -4,7 +4,7 @@ description: >-
   thread pool — with reproducible benchmarks showing what happens when a Rust
   server misuses async primitives under load.
 date: 2025-01-15
-status: draft
+status: published
 topic: backend-engineering
 tags:
   - rust
@@ -20,7 +20,6 @@ relatedArticles:
 relatedExperiments:
   - rust-tokio-blocking
 ---
-
 Every Rust engineer has heard the pitch: *"Rust's async is zero-cost — your code compiles to state machines with no runtime overhead."*
 
 We repeat it in architecture discussions. We cite it when justifying Rust over Go or Node.js. We nod along when benchmarks show Axum handling hundreds of thousands of requests per second.
@@ -121,8 +120,9 @@ fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Output>
 ```
 
 When called, the future either:
-- Returns `Poll::Ready(value)` — computation is complete
-- Returns `Poll::Pending` — registers `cx.waker().clone()` somewhere that will call `wake()` when progress is possible, then returns
+
+* Returns `Poll::Ready(value)` — computation is complete
+* Returns `Poll::Pending` — registers `cx.waker().clone()` somewhere that will call `wake()` when progress is possible, then returns
 
 The critical rule: **a future that returns `Poll::Pending` must never re-enter `poll()` until its Waker has been called**. If a future performs synchronous blocking work inside `poll()`, it violates this contract — it holds the worker thread for the entire blocking duration, preventing every other task in the queue from being polled.
 
@@ -176,12 +176,12 @@ When 50 clients hit `/compute?strategy=blocking` concurrently on an 8-core machi
 
 **Benchmark results (blocking strategy, 50 concurrent connections, 30s):**
 
-| Metric | Baseline (1 req) | Under load (50 concurrent) |
-|---|---|---|
-| `/health` p50 latency | ~2 ms | >100 ms |
-| `/health` p99 latency | ~3 ms | >300 ms |
-| `/compute` throughput | ~8 req/s | ~8 req/s |
-| `/compute` error rate | 0% | 0% |
+| Metric                | Baseline (1 req) | Under load (50 concurrent) |
+| --------------------- | ---------------- | -------------------------- |
+| `/health` p50 latency | \~2 ms           | >100 ms                    |
+| `/health` p99 latency | \~3 ms           | >300 ms                    |
+| `/compute` throughput | \~8 req/s        | \~8 req/s                  |
+| `/compute` error rate | 0%               | 0%                         |
 
 > *Expected outcomes based on an 8-core machine. Replace with measured values after running the benchmarks in the README.*
 
@@ -245,12 +245,12 @@ The `bounded` strategy adds a `tokio::sync::Semaphore` to cap concurrency:
 
 **Comparison: direct handler vs spawn_blocking**
 
-| Dimension | Direct async handler (`blocking`) | `spawn_blocking` |
-|---|---|---|
-| Worker thread held during CPU work | Yes — for full 100 ms | No — `.await` releases it immediately |
-| Impact on unrelated async tasks | Starves all tasks on that worker | None — worker is free to poll other futures |
-| Worker threads consumed | 1 per request (while running) | 0 async workers; 1 blocking pool thread |
-| Recommended use case | Only for work < 10–100 µs | Any synchronous work > 100 µs |
+| Dimension                          | Direct async handler (`blocking`) | `spawn_blocking`                            |
+| ---------------------------------- | --------------------------------- | ------------------------------------------- |
+| Worker thread held during CPU work | Yes — for full 100 ms             | No — `.await` releases it immediately       |
+| Impact on unrelated async tasks    | Starves all tasks on that worker  | None — worker is free to poll other futures |
+| Worker threads consumed            | 1 per request (while running)     | 0 async workers; 1 blocking pool thread     |
+| Recommended use case               | Only for work \< 10–100 µs        | Any synchronous work > 100 µs               |
 
 The rule of thumb: if a synchronous operation takes longer than **100 microseconds**, move it to `spawn_blocking`. Shorter synchronous work (small arithmetic, field access, cheap string formatting) is fine to run inline in an async handler.
 
@@ -262,17 +262,18 @@ If you've read the [companion Node.js article](/writing/nodejs-single-threaded),
 
 ### Correspondence Table
 
-| Dimension | Node.js | Tokio (Rust) |
-|---|---|---|
-| Async execution thread model | Single main thread (Event Loop) + 4 libuv workers | N worker threads (default: num_cpus) |
-| I/O driver mechanism | libuv polls epoll/kqueue on the main thread | I/O driver integrated into worker thread polling |
-| Task scheduling strategy | FIFO callback queue (single-threaded) | Work-stealing deque (multi-threaded, lock-free) |
-| Consequence of blocking execution thread | Blocks all JS, all I/O callbacks, all timers | Blocks that worker's queue only; other workers continue |
-| Blocking work pool | libuv thread pool (fixed: `UV_THREADPOOL_SIZE=4`) | Tokio blocking pool (dynamic: up to 512 threads) |
+| Dimension                                | Node.js                                           | Tokio (Rust)                                            |
+| ---------------------------------------- | ------------------------------------------------- | ------------------------------------------------------- |
+| Async execution thread model             | Single main thread (Event Loop) + 4 libuv workers | N worker threads (default: num_cpus)                    |
+| I/O driver mechanism                     | libuv polls epoll/kqueue on the main thread       | I/O driver integrated into worker thread polling        |
+| Task scheduling strategy                 | FIFO callback queue (single-threaded)             | Work-stealing deque (multi-threaded, lock-free)         |
+| Consequence of blocking execution thread | Blocks all JS, all I/O callbacks, all timers      | Blocks that worker's queue only; other workers continue |
+| Blocking work pool                       | libuv thread pool (fixed: `UV_THREADPOOL_SIZE=4`) | Tokio blocking pool (dynamic: up to 512 threads)        |
 
 ### Side-by-Side: Offloading CPU Work
 
 **Node.js — libuv thread pool via callback:**
+
 ```javascript
 crypto.pbkdf2('password', 'salt', 100000, 64, 'sha512', (err, key) => {
   // executes on a libuv worker thread (Thread #2–#5)
@@ -282,6 +283,7 @@ crypto.pbkdf2('password', 'salt', 100000, 64, 'sha512', (err, key) => {
 ```
 
 **Rust — Tokio blocking pool via spawn_blocking:**
+
 ```rust
 let key = tokio::task::spawn_blocking(|| {
     // executes on a blocking pool thread (not a worker thread)
@@ -301,13 +303,13 @@ The key difference: Node.js's pool is fixed at 4 threads (or `UV_THREADPOOL_SIZE
 
 > *All values are expected outcomes based on an 8-core machine running the experiment server from `experiments/rust-tokio-blocking/`. Replace with measured values after running the benchmarks described in the README.*
 
-| Strategy | /health p50 | /health p99 | /compute throughput | Error rate |
-|---|---|---|---|---|
-| `blocking` | >100 ms | >300 ms | ~8 req/s | ~0% |
-| `spawn_blocking` | ≤2 ms | ≤5 ms | ~8 req/s | ~0% |
-| `bounded` | ≤2 ms | ≤5 ms | ~4 req/s | ~0% (503s counted separately) |
+| Strategy         | /health p50 | /health p99 | /compute throughput | Error rate                     |
+| ---------------- | ----------- | ----------- | ------------------- | ------------------------------ |
+| `blocking`       | >100 ms     | >300 ms     | \~8 req/s           | \~0%                           |
+| `spawn_blocking` | ≤2 ms       | ≤5 ms       | \~8 req/s           | \~0%                           |
+| `bounded`        | ≤2 ms       | ≤5 ms       | \~4 req/s           | \~0% (503s counted separately) |
 
-The critical observation: `spawn_blocking` and `blocking` show the same `/compute` throughput (~8 req/s). The difference is entirely in what happens to unrelated concurrent tasks. The blocking strategy monopolises worker threads; spawn_blocking releases them.
+The critical observation: `spawn_blocking` and `blocking` show the same `/compute` throughput (\~8 req/s). The difference is entirely in what happens to unrelated concurrent tasks. The blocking strategy monopolises worker threads; spawn_blocking releases them.
 
 ### Request Execution Timeline
 
@@ -380,6 +382,6 @@ The corrected mental model: *"Async Rust is cooperative, not preemptive. The sch
 
 The mental model that makes production Rust async work:
 
-- **Async handler → I/O, timers, channels**: let `.await` suspend and release the thread
-- **Synchronous work > 100 µs → `spawn_blocking`**: move it off the worker thread
-- **Sustained CPU parallelism → `std::thread` or `rayon`**: don't fight the async runtime
+* **Async handler → I/O, timers, channels**: let `.await` suspend and release the thread
+* **Synchronous work > 100 µs → `spawn_blocking`**: move it off the worker thread
+* **Sustained CPU parallelism → `std::thread` or `rayon`**: don't fight the async runtime

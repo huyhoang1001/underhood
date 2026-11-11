@@ -21,6 +21,16 @@ const TokioArchitectureDiagramBlock = block({
   schema: {}
 });
 
+const GoSchedulerDiagramBlock = block({
+  label: 'Go Scheduler Diagram',
+  schema: {}
+});
+
+const GoSchedulerSimulatorBlock = block({
+  label: 'Go Scheduler Simulator',
+  schema: {}
+});
+
 export default config({
   storage: {
     kind: 'github',
@@ -77,7 +87,9 @@ export default config({
             NodeProcessDiagram: NodeProcessDiagramBlock,
             NodeThreadpoolVisualizer: NodeThreadpoolVisualizerBlock,
             ThreadPoolVisualizer: ThreadPoolVisualizerBlock,
-            TokioArchitectureDiagram: TokioArchitectureDiagramBlock
+            TokioArchitectureDiagram: TokioArchitectureDiagramBlock,
+            GoSchedulerDiagram: GoSchedulerDiagramBlock,
+            GoSchedulerSimulator: GoSchedulerSimulatorBlock
           }
         })
       }
@@ -142,7 +154,9 @@ export default config({
             NodeProcessDiagram: NodeProcessDiagramBlock,
             NodeThreadpoolVisualizer: NodeThreadpoolVisualizerBlock,
             ThreadPoolVisualizer: ThreadPoolVisualizerBlock,
-            TokioArchitectureDiagram: TokioArchitectureDiagramBlock
+            TokioArchitectureDiagram: TokioArchitectureDiagramBlock,
+            GoSchedulerDiagram: GoSchedulerDiagramBlock,
+            GoSchedulerSimulator: GoSchedulerSimulatorBlock
           }
         })
       }

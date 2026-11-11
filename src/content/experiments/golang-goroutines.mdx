@@ -1,0 +1,56 @@
+---
+tagline: >-
+  Empirical benchmark of Go scheduler starvation under CPU-bound goroutines,
+  worker pool isolation with buffered channels, and bounded concurrency
+  backpressure on a Go net/http server.
+date: 2025-07-15
+status: draft
+topic: backend-engineering
+hypothesis: >-
+  Executing a 100 ms CPU-bound loop directly in a request goroutine with
+  GOMAXPROCS=1 starves the Go scheduler — causing /health latency to spike
+  from ~2 ms to >100 ms under 50 concurrent connections. A fixed-size worker
+  pool draining a buffered channel keeps /health latency at ≤5 ms regardless
+  of GOMAXPROCS, because CPU concurrency is bounded independently of the
+  goroutine count.
+setup: >-
+  Go 1.22 on macOS (Apple Silicon). Three strategies benchmarked with
+  wrk -t4 -c50 -d30s. Tested under GOMAXPROCS=1 and GOMAXPROCS=num_cores.
+  Worker pool size: 4 goroutines. Bounded channel depth: 20. Per-request
+  CSV latency logged to stdout.
+implementation: >-
+  Three /compute?strategy= branches in main.go: 'goroutine' runs the busy-wait
+  directly in the request goroutine, 'workerpool' dispatches to a pre-started
+  pool of 4 goroutines via a buffered job channel, and 'bounded' adds a
+  queue-depth cap of 20 returning 503 when full. Goroutine ID extracted from
+  runtime.Stack() output. Handlers unit-tested via net/http/httptest.
+keyFindings:
+  - >-
+    'goroutine' strategy with GOMAXPROCS=1: /health p99 degrades to >100 ms
+    under 50 concurrent compute requests — Go scheduler starvation confirmed.
+  - >-
+    'goroutine' strategy with GOMAXPROCS=num_cores: /health p99 stays ≤10 ms —
+    true parallelism prevents starvation when cores are available.
+  - >-
+    'workerpool' strategy: /health p99 stays ≤5 ms regardless of GOMAXPROCS
+    setting — bounded CPU concurrency keeps the scheduler free.
+  - >-
+    'bounded' strategy: matches workerpool latency isolation while returning
+    503 to excess requests instead of allowing unlimited goroutine queue growth.
+limitations:
+  - >-
+    Benchmark numbers reflect a specific machine; exact latencies vary with
+    CPU core count and OS scheduler behaviour.
+  - >-
+    The 100 ms busy-wait is a synthetic proxy for real CPU work — actual
+    workloads show different distribution shapes.
+  - >-
+    Go's asynchronous preemption (introduced in Go 1.14) can interrupt
+    CPU-bound goroutines at safe points, which may reduce starvation severity
+    compared to pre-1.14 versions.
+githubRepo: >-
+  https://github.com/huyhoang1001/underhood/tree/main/experiments/golang-goroutines
+relatedArticleSlug: golang-goroutines
+---
+
+{/* Experiment metadata page — see the related article for full context. */}

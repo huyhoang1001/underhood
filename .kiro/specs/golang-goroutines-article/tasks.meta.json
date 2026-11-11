@@ -1,0 +1,602 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Scaffold `experiments/golang-goroutines/` with `go.mod` and empty `main.go`": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660151
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301681214
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301762055
+      }
+    ],
+    "2.1 Define response types and `AppState`": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660214
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301769020
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301834730
+      }
+    ],
+    "2.2 Implement `main()` with startup logging and router setup": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660254
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301849721
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301926920
+      }
+    ],
+    "2.3 Implement `healthHandler()`": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660281
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301932828
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301978874
+      }
+    ],
+    "2.4 Implement `computeHandler()` — `goroutine` strategy branch": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660312
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301986706
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794302037692
+      }
+    ],
+    "2.5 Implement `computeHandler()` — `workerpool` strategy branch": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660345
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794302043442
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794302085699
+      }
+    ],
+    "2.6 Implement `computeHandler()` — `bounded` strategy branch": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660369
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794302092146
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794302441428
+      }
+    ],
+    "2.7 Implement `computeHandler()` — unknown strategy branch, `runBlockingWork()`, and helpers": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660394
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794302447682
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794302523239
+      }
+    ],
+    "2.8 Extract `newRouter()` helper function for testability": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660423
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794302530199
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794302580093
+      }
+    ],
+    "3. Checkpoint — Compile, vet, and format the Go project": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660454
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794302586804
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303233726
+      }
+    ],
+    "4.1 Write unit tests for `healthHandler` and known-good strategies": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660487
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303246892
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303425642
+      }
+    ],
+    "4.2 Write unit test for unknown strategy → 400": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660517
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303442383
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303830710
+      }
+    ],
+    "5. Checkpoint — Run the full Go test suite": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660555
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303889095
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303916310
+      }
+    ],
+    "6.1 Write the README with prerequisites, build/run instructions, endpoint reference, benchmark commands, and expected outcomes table": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660596
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303270483
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303425690
+      }
+    ],
+    "7.1 Create `src/components/GoSchedulerDiagram.tsx` modelled after `TokioArchitectureDiagram.tsx`": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660625
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303270546
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303425756
+      }
+    ],
+    "8.1 Create `src/components/GoSchedulerDiagramIsland.astro`": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660655
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303845524
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303876589
+      }
+    ],
+    "9.1 Update `keystatic.config.ts` to register `GoSchedulerDiagramBlock`": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660687
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303923472
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794304056375
+      }
+    ],
+    "9.2 Update `src/pages/writing/[slug].astro` to import and pass `GoSchedulerDiagramIsland`": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660713
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303923508
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794304056440
+      }
+    ],
+    "10.1 Create `src/content/experiments/golang-goroutines.mdx` with all required frontmatter fields": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660745
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303923543
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794304056513
+      }
+    ],
+    "11.1 Write the article frontmatter": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660768
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794304063972
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794304114801
+      }
+    ],
+    "11.2 Write the article opening and `<GoSchedulerDiagram />` placement": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660795
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794304133980
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794304568301
+      }
+    ],
+    "11.3 Write \"First, what is a goroutine?\" section": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660825
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794304574547
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794304624467
+      }
+    ],
+    "11.4 Write \"The Go scheduler: G, M, and P\" section with Mermaid diagram": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660852
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794304631089
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794304780305
+      }
+    ],
+    "11.5 Write \"What goes wrong when a goroutine won't yield\" section": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660876
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794304787592
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794305206288
+      }
+    ],
+    "11.6 Write \"Channels and the worker pool pattern\" section": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660902
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794305213189
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794305261760
+      }
+    ],
+    "11.7 Write \"Go vs. Node.js and Rust — a quick comparison\" section": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660929
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794305271638
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794305332536
+      }
+    ],
+    "11.8 Write \"Benchmark Results\" section": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660960
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794305339755
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794305717770
+      }
+    ],
+    "11.9 Write \"The production decision guide\" section and conclusion": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301660987
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794305725733
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794305815651
+      }
+    ],
+    "12. Checkpoint — Validate content schema and confirm pages render": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301661021
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794305823254
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794306023882
+      }
+    ],
+    "13.1 Add Go article/experiment frontmatter property tests to `test/frontmatter-roundtrip.test.ts`": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301661053
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794306030632
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794306120149
+      }
+    ],
+    "14. Final checkpoint — All tests pass end to end": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301661083
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794306127041
+      },
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794306195229
+      }
+    ],
+    "1. Create the Go experiment project skeleton": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794301762091
+      }
+    ],
+    "2. Implement `main.go` — types, router, and all three strategies": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794302580139
+      }
+    ],
+    "6. Create `experiments/golang-goroutines/README.md`": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303425721
+      }
+    ],
+    "7. Create the `GoSchedulerDiagram` React component": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303425784
+      }
+    ],
+    "4. Write Go unit and property tests in `main_test.go`": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303830743
+      }
+    ],
+    "8. Create the `GoSchedulerDiagramIsland` Astro island": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794303876632
+      }
+    ],
+    "9. Register `GoSchedulerDiagramBlock` in Keystatic and wire the island into `[slug].astro`": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794304056471
+      }
+    ],
+    "10. Create the experiment MDX metadata file": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794304056573
+      }
+    ],
+    "11. Create the article MDX file with full body content": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794305815708
+      }
+    ],
+    "13. Write TypeScript property tests for frontmatter round-trip": [
+      {
+        "executionId": "50aca349-a925-43ae-96a4-e420bf8616a8",
+        "chatSessionId": "sess_4c01cdcf-dad9-4bfe-bf35-1636946abd8f",
+        "timestamp": 1794306120197
+      }
+    ]
+  }
+}

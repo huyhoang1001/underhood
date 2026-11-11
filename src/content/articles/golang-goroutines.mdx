@@ -1,10 +1,10 @@
 ---
 description: >-
-  A hands-on journey through Go's goroutines, the M:N scheduler, GOMAXPROCS,
-  and the worker pool pattern — with reproducible benchmarks showing what
-  happens when a Go server runs CPU-heavy work without bounding concurrency.
+  A hands-on journey through Go's goroutines, the M:N scheduler, GOMAXPROCS, and
+  the worker pool pattern — with reproducible benchmarks showing what happens
+  when a Go server runs CPU-heavy work without bounding concurrency.
 date: 2025-07-15
-status: draft
+status: published
 topic: backend-engineering
 tags:
   - go
@@ -21,7 +21,6 @@ relatedArticles:
 relatedExperiments:
   - golang-goroutines
 ---
-
 Go ships with a promise: goroutines are cheap. Create a million of them. The runtime handles the scheduling. Your server can handle ten thousand concurrent requests without breaking a sweat.
 
 Run this server with `GOMAXPROCS=1` and hit `/compute` with 50 concurrent connections, each triggering a 100 ms CPU-bound loop. Then probe `/health` from a second terminal:
@@ -171,16 +170,17 @@ That's **scheduler starvation**. No bug. No race condition. Just a P with no cap
 
 Here's what the benchmark shows under these conditions:
 
-| Strategy | GOMAXPROCS | /health p99 | /compute RPS | Error rate |
-|---|---|---|---|---|
-| `goroutine` | 1 | >100 ms | ~8 req/s | 0% |
-| `goroutine` | num_cores | ≤10 ms | ~300 req/s | 0% |
+| Strategy    | GOMAXPROCS | /health p99 | /compute RPS | Error rate |
+| ----------- | ---------- | ----------- | ------------ | ---------- |
+| `goroutine` | 1          | >100 ms     | \~8 req/s    | 0%         |
+| `goroutine` | num_cores  | ≤10 ms      | \~300 req/s  | 0%         |
 
 > **⚠ Warning: Goroutine Leaks Are Silent**
 >
 > A goroutine blocked forever on a channel receive that never gets a sender consumes memory indefinitely. There are no warnings, no panics, no GC intervention. Always ensure every job sent into a worker channel has a corresponding receiver, or use `select` with a `ctx.Done()` case to give the goroutine an escape path.
 
 ---
+
 ## Channels and the worker pool pattern
 
 The fix for scheduler starvation is to move the CPU-bound work off the request goroutine and into a fixed pool of worker goroutines. The request goroutine blocks on a channel receive while waiting, which releases the P.
@@ -219,7 +219,7 @@ case "workerpool":
 
 The handler goroutine parks on `<-req.result`. The P is free to run `/health` or any other goroutine. When a worker finishes, it sends the result back, which unparks the handler.
 
-With 4 workers and a 100 ms busy-wait, throughput is capped at ~40 req/s. That's the trade-off: you limit CPU concurrency to keep the scheduler free.
+With 4 workers and a 100 ms busy-wait, throughput is capped at \~40 req/s. That's the trade-off: you limit CPU concurrency to keep the scheduler free.
 
 ### The bounded strategy
 
@@ -241,11 +241,11 @@ The `select` with a `default` case is how Go does non-blocking channel operation
 
 This gives you backpressure: the server rejects work it can't handle instead of queuing it indefinitely.
 
-| Strategy | CPU concurrency | /health impact | Backpressure |
-|---|---|---|---|
-| `goroutine` | Unlimited (one per request) | Starvation under GOMAXPROCS=1 | None — all requests queue |
-| `workerpool` | Bounded (4 workers) | ≤5 ms p99 regardless of GOMAXPROCS | None — large buffer absorbs spikes |
-| `bounded` | Bounded (4 workers) | ≤5 ms p99 regardless of GOMAXPROCS | 503 on queue full — excess requests rejected |
+| Strategy     | CPU concurrency             | /health impact                     | Backpressure                                 |
+| ------------ | --------------------------- | ---------------------------------- | -------------------------------------------- |
+| `goroutine`  | Unlimited (one per request) | Starvation under GOMAXPROCS=1      | None — all requests queue                    |
+| `workerpool` | Bounded (4 workers)         | ≤5 ms p99 regardless of GOMAXPROCS | None — large buffer absorbs spikes           |
+| `bounded`    | Bounded (4 workers)         | ≤5 ms p99 regardless of GOMAXPROCS | 503 on queue full — excess requests rejected |
 
 ---
 
@@ -283,12 +283,12 @@ tokio::task::spawn_blocking(move || { // offload to blocking pool
 
 [Node.js](/writing/nodejs-single-threaded) has `UV_THREADPOOL_SIZE=4` — a fixed thread pool for synchronous operations that cannot run on the event loop. Go has no equivalent because goroutines are not OS threads. `GOMAXPROCS` controls the maximum number of OS threads running goroutines simultaneously — it sets the parallelism ceiling, not a thread pool size. The Go runtime creates and destroys OS threads as needed, bounded by GOMAXPROCS.
 
-| Dimension | Go | Node.js | Rust/Tokio |
-|---|---|---|---|
-| Scheduler thread model | M:N (goroutines → Ps → Ms) | Single-threaded event loop | M:N (tasks → worker threads) |
-| CPU-bound handler with no yield | Holds a P, starves others | Blocks the event loop entirely | Holds a worker thread, starves others |
-| Idiomatic fix for CPU-heavy work | Worker pool + buffered channel | Offload to worker_threads or child process | `spawn_blocking` + Semaphore |
-| Default parallelism unit | GOMAXPROCS (= num CPU cores) | 1 (single thread) | num_cpus (worker threads) |
+| Dimension                        | Go                             | Node.js                                    | Rust/Tokio                            |
+| -------------------------------- | ------------------------------ | ------------------------------------------ | ------------------------------------- |
+| Scheduler thread model           | M:N (goroutines → Ps → Ms)     | Single-threaded event loop                 | M:N (tasks → worker threads)          |
+| CPU-bound handler with no yield  | Holds a P, starves others      | Blocks the event loop entirely             | Holds a worker thread, starves others |
+| Idiomatic fix for CPU-heavy work | Worker pool + buffered channel | Offload to worker_threads or child process | `spawn_blocking` + Semaphore          |
+| Default parallelism unit         | GOMAXPROCS (= num CPU cores)   | 1 (single thread)                          | num_cpus (worker threads)             |
 
 ---
 
@@ -298,21 +298,21 @@ tokio::task::spawn_blocking(move || { // offload to blocking pool
 
 ### GOMAXPROCS=1
 
-| Strategy | /health p50 | /health p99 | /compute throughput | Error rate |
-|---|---|---|---|---|
-| `goroutine` | ~50 ms | >100 ms | ~8 req/s | 0% |
-| `workerpool` | \<2 ms | ≤5 ms | ~40 req/s | 0% |
-| `bounded` | \<2 ms | ≤5 ms | ~40 req/s | varies |
+| Strategy     | /health p50 | /health p99 | /compute throughput | Error rate |
+| ------------ | ----------- | ----------- | ------------------- | ---------- |
+| `goroutine`  | \~50 ms     | >100 ms     | \~8 req/s           | 0%         |
+| `workerpool` | \<2 ms      | ≤5 ms       | \~40 req/s          | 0%         |
+| `bounded`    | \<2 ms      | ≤5 ms       | \~40 req/s          | varies     |
 
 ### GOMAXPROCS=num_cores
 
-| Strategy | /health p50 | /health p99 | /compute throughput | Error rate |
-|---|---|---|---|---|
-| `goroutine` | \<2 ms | ≤10 ms | ~300 req/s | 0% |
-| `workerpool` | \<2 ms | ≤5 ms | ~40 req/s | 0% |
-| `bounded` | \<2 ms | ≤5 ms | ~40 req/s | varies |
+| Strategy     | /health p50 | /health p99 | /compute throughput | Error rate |
+| ------------ | ----------- | ----------- | ------------------- | ---------- |
+| `goroutine`  | \<2 ms      | ≤10 ms      | \~300 req/s         | 0%         |
+| `workerpool` | \<2 ms      | ≤5 ms       | \~40 req/s          | 0%         |
+| `bounded`    | \<2 ms      | ≤5 ms       | \~40 req/s          | varies     |
 
-The `goroutine` strategy's throughput difference between GOMAXPROCS=1 and num_cores is striking: ~8 req/s vs ~300 req/s. With a single P, goroutines queue sequentially. With 8 Ps, 8 goroutines run the busy-wait in true parallel.
+The `goroutine` strategy's throughput difference between GOMAXPROCS=1 and num_cores is striking: \~8 req/s vs \~300 req/s. With a single P, goroutines queue sequentially. With 8 Ps, 8 goroutines run the busy-wait in true parallel.
 
 The `workerpool` and `bounded` strategies show the same performance regardless of GOMAXPROCS: 4 workers cap CPU concurrency. The scheduler stays free.
 
@@ -352,10 +352,10 @@ Before reading the decision guide, see the difference in action. Press **Play** 
 
 **What to try:**
 
-- **GOMAXPROCS=1, goroutine strategy** — watch the /health latency chart turn red as the single P gets saturated
-- **GOMAXPROCS=1, workerpool strategy** — switch strategies and watch /health latency drop back to green
-- **GOMAXPROCS=4 or 8, goroutine strategy** — see work stealing distribute goroutines across Ps
-- **GOMAXPROCS=4 or 8, workerpool strategy** — notice it makes no difference; the worker pool is what matters, not the P count
+* **GOMAXPROCS=1, goroutine strategy** — watch the /health latency chart turn red as the single P gets saturated
+* **GOMAXPROCS=1, workerpool strategy** — switch strategies and watch /health latency drop back to green
+* **GOMAXPROCS=4 or 8, goroutine strategy** — see work stealing distribute goroutines across Ps
+* **GOMAXPROCS=4 or 8, workerpool strategy** — notice it makes no difference; the worker pool is what matters, not the P count
 
 The green bars in the latency chart mean /health responded in under 10 ms. The red bars mean it waited behind compute work. The simulator runs at 5x speed for visual clarity — in reality, each goroutine holds the P for a full 100 ms.
 
@@ -383,8 +383,8 @@ flowchart TD
 
 **Rules of thumb:**
 
-- **I/O-bound work** (database queries, HTTP calls, file reads via `net.Conn`): use plain goroutines. The network poller parks the goroutine and releases the P. No special handling needed.
-- **CPU-bound work with bounded concurrency needs**: use a worker pool draining a buffered channel. The pool size caps CPU concurrency. The request goroutine parks on a channel receive and releases its P.
-- **CPU-bound work with true parallelism needs**: ensure `GOMAXPROCS` equals the number of available CPU cores (the default since Go 1.5). Multiple goroutines can run in true parallel across cores. But if your concurrency exceeds GOMAXPROCS, you're back to queueing.
+* **I/O-bound work** (database queries, HTTP calls, file reads via `net.Conn`): use plain goroutines. The network poller parks the goroutine and releases the P. No special handling needed.
+* **CPU-bound work with bounded concurrency needs**: use a worker pool draining a buffered channel. The pool size caps CPU concurrency. The request goroutine parks on a channel receive and releases its P.
+* **CPU-bound work with true parallelism needs**: ensure `GOMAXPROCS` equals the number of available CPU cores (the default since Go 1.5). Multiple goroutines can run in true parallel across cores. But if your concurrency exceeds GOMAXPROCS, you're back to queueing.
 
 Goroutines are cheap. A P is not. CPU-bound work without yield points holds a P and starves everything queued on it. The worker pool pattern — four goroutines draining a channel — bounds this by keeping CPU concurrency fixed and letting the scheduler breathe.

@@ -4,6 +4,8 @@ import ArticleLayout from '../../layouts/ArticleLayout.astro';
 import NodeProcessDiagramIsland from '../../components/NodeProcessDiagramIsland.astro';
 import NodeThreadpoolVisualizerIsland from '../../components/NodeThreadpoolVisualizerIsland.astro';
 import TokioArchitectureDiagramIsland from '../../components/TokioArchitectureDiagramIsland.astro';
+import GoSchedulerDiagramIsland from '../../components/GoSchedulerDiagramIsland.astro';
+import GoSchedulerSimulatorIsland from '../../components/GoSchedulerSimulatorIsland.astro';
 import MermaidBlock from '../../components/MermaidBlock.astro';
 import { calculateReadingTime } from '../../utils/readingTime';
 
@@ -60,5 +62,5 @@ const relatedArticles = allArticles
   toc={toc}
   relatedArticles={relatedArticles}
 >
-  <Content components={{ NodeProcessDiagram: NodeProcessDiagramIsland, NodeThreadpoolVisualizer: NodeThreadpoolVisualizerIsland, ThreadPoolVisualizer: NodeThreadpoolVisualizerIsland, TokioArchitectureDiagram: TokioArchitectureDiagramIsland, MermaidBlock: MermaidBlock }} />
+  <Content components={{ NodeProcessDiagram: NodeProcessDiagramIsland, NodeThreadpoolVisualizer: NodeThreadpoolVisualizerIsland, ThreadPoolVisualizer: NodeThreadpoolVisualizerIsland, TokioArchitectureDiagram: TokioArchitectureDiagramIsland, GoSchedulerDiagram: GoSchedulerDiagramIsland, GoSchedulerSimulator: GoSchedulerSimulatorIsland, MermaidBlock: MermaidBlock }} />
 </ArticleLayout>

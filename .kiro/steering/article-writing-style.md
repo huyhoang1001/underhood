@@ -90,14 +90,37 @@ Every article should follow this skeleton:
 
 ## Component usage
 
-The following MDX components are available:
+### Architecture diagrams (article body)
+
+These components belong in the article MDX body. Place them immediately after the opening section, before the first `##` heading — same position each time.
 
 - `<TokioArchitectureDiagram />` — interactive 5-layer Tokio architecture map
 - `<NodeProcessDiagram />` — interactive Node.js process layer map
-- `<NodeThreadpoolVisualizer />` — interactive libuv thread pool simulator
-- ` ```mermaid ` fenced blocks — rendered via Mermaid JS (flowcharts, sequence diagrams)
+- `<GoSchedulerDiagram />` — interactive 5-layer Go M:N scheduler map
 
-Place interactive diagrams immediately after the opening, before the first section heading. Place Mermaid diagrams inline where they clarify the surrounding text.
+### Interactive simulators (experiment page only)
+
+Simulators and visualizers that let the reader play with parameters belong on the **experiment page**, not in the article body. They are registered as `interactiveType` values in the experiment MDX frontmatter and rendered by `ExperimentVisualizer` on `src/pages/experiments/[slug].astro`.
+
+**Rule: never embed a simulator component directly in an article MDX file.**
+
+| Component | interactiveType value | Experiment page |
+|---|---|---|
+| `<NodeThreadpoolVisualizer />` | `node-threadpool` | `/experiments/nodejs-libuv-threadpool` |
+| `<TokioSchedulerVisualizer />` | `tokio-scheduler` | `/experiments/rust-tokio-blocking` |
+| `<GoSchedulerSimulator />` | `go-scheduler` | `/experiments/golang-goroutines` |
+
+To add a new simulator:
+1. Build the React component in `src/components/`
+2. Add a new `interactiveType` enum value to `src/content/config.ts`, `src/lib/content/schema.ts`, `src/types/index.ts`, `src/layouts/ExperimentLayout.astro`, and `keystatic.config.ts`
+3. Add the case to `src/components/ExperimentVisualizer.tsx`
+4. Set `interactiveType: <value>` in the experiment MDX frontmatter
+
+The article body links to the experiment page automatically via the `relatedExperiments` frontmatter array — no manual linking needed.
+
+### Mermaid diagrams
+
+` ```mermaid ` fenced blocks are rendered via the Mermaid JS remark plugin. Place them inline where they clarify the surrounding text — typically inside a section, not at the top level. Use for flowcharts, sequence diagrams, and relationship graphs that prose cannot convey clearly.
 
 ## Technical accuracy requirements
 

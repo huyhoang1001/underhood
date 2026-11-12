@@ -344,23 +344,6 @@ The problem only arises when goroutines do CPU work without yielding — which b
 
 ---
 
-## Try it yourself: Go scheduler simulator
-
-Before reading the decision guide, see the difference in action. Press **Play** and watch what happens to `/health` latency under each configuration:
-
-<GoSchedulerSimulator />
-
-**What to try:**
-
-- **GOMAXPROCS=1, goroutine strategy** — watch the /health latency chart turn red as the single P gets saturated
-- **GOMAXPROCS=1, workerpool strategy** — switch strategies and watch /health latency drop back to green
-- **GOMAXPROCS=4 or 8, goroutine strategy** — see work stealing distribute goroutines across Ps
-- **GOMAXPROCS=4 or 8, workerpool strategy** — notice it makes no difference; the worker pool is what matters, not the P count
-
-The green bars in the latency chart mean /health responded in under 10 ms. The red bars mean it waited behind compute work. The simulator runs at 5x speed for visual clarity — in reality, each goroutine holds the P for a full 100 ms.
-
----
-
 ## The production decision guide
 
 When you're writing Go services that handle concurrent requests, the choice of concurrency pattern depends on what kind of work each request does.

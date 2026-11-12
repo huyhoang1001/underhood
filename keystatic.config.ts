@@ -144,7 +144,8 @@ export default config({
             { label: 'Queue Backpressure', value: 'queue-backpressure' },
             { label: 'gRPC Multiplex', value: 'grpc-multiplex' },
             { label: 'Cache Invalidation', value: 'cache-invalidation' },
-            { label: 'Tokio Scheduler', value: 'tokio-scheduler' }
+            { label: 'Tokio Scheduler', value: 'tokio-scheduler' },
+            { label: 'Go Scheduler', value: 'go-scheduler' }
           ],
           defaultValue: 'node-threadpool'
         }),
